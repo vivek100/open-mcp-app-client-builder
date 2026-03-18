@@ -3,7 +3,7 @@ export interface McpServerEntry {
   serverId?: string;
 }
 
-/** Initial sidebar list. Set NEXT_PUBLIC_DEFAULT_MCP_SERVERS (JSON array) in Vercel to pre-fill hosted MCP(s). */
+/** Initial sidebar list. No defaults (localhost not available on Vercel). Set NEXT_PUBLIC_DEFAULT_MCP_SERVERS to pre-fill hosted MCP(s). */
 function getDefaultServersFromEnv(): McpServerEntry[] | null {
   const raw = process.env.NEXT_PUBLIC_DEFAULT_MCP_SERVERS;
   if (typeof raw !== "string" || !raw) return null;
@@ -21,10 +21,4 @@ function getDefaultServersFromEnv(): McpServerEntry[] | null {
 
 const envDefaults = getDefaultServersFromEnv();
 
-export const DEFAULT_SERVERS: McpServerEntry[] =
-  envDefaults !== null
-    ? envDefaults
-    : [
-        { endpoint: "http://localhost:3108/mcp", serverId: "threejs" },
-        { endpoint: "http://localhost:3109/mcp", serverId: "mcp-use-server" },
-      ];
+export const DEFAULT_SERVERS: McpServerEntry[] = envDefaults ?? [];

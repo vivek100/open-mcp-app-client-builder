@@ -24,10 +24,9 @@ const STARTER_PROMPTS = [
 ];
 
 const CHAT_LABELS = {
-  chatInputPlaceholder:
-    "Ask me to build a widget, add a tool, or use an existing one…",
+  chatInputPlaceholder: "Ask me to build a widget or add an MCP server…",
   welcomeMessageText:
-    "Hi! I'm the MCP App builder agent. I can build, edit, and test MCP tool widgets in a live E2B sandbox. Tell me what kind of tool you'd like to create, or pick a starter above!",
+    "Hi! I'm the MCP App builder. Add an MCP server in the sidebar, or ask me to build a widget.",
 } as const;
 
 // ---------------------------------------------------------------------------
