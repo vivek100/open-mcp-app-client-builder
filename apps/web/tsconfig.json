@@ -30,12 +30,20 @@
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "app/**/*",
+    "lib/**/*",
+    "next.config.mjs",
+    "next.config.ts",
+    "postcss.config.mjs",
+    "eslint.config.mjs",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "test-*.mjs",
+    "test-*.ts",
+    "**/test-*.mjs",
+    "**/test-*.ts"
   ]
 }

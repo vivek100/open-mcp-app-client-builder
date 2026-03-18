@@ -544,7 +544,8 @@ export const POST = async (req: NextRequest) => {
   const agent = new BuiltInAgent({
     model: "openai/gpt-4o",
     prompt: AGENT_SYSTEM_PROMPT,
-    tools: workspaceTools,
+    // Cast: defineTool() returns specific Zod types; BuiltInAgent expects ToolDefinition<ZodTypeAny>[]
+    tools: workspaceTools as unknown as ConstructorParameters<typeof BuiltInAgent>[0]["tools"],
   });
 
   // @ts-expect-error - @ag-ui/client version mismatch between middleware (0.0.42) and runtime (0.0.43)
