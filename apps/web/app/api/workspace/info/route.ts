@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProvider } from "@/lib/workspace";
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   try {
     const { workspaceId } = (await req.json()) as { workspaceId?: string };

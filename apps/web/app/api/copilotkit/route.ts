@@ -231,7 +231,7 @@ const workspaceTools = [
   defineTool({
     name: "download_workspace",
     description:
-      "Package the current workspace as a zip (excludes node_modules/dist) and return a signed download URL. " +
+      "Package the current workspace as a .tar.gz archive (excludes node_modules/dist) and return a signed download URL. " +
       "Present the URL to the user so they can download their MCP server.",
     parameters: z.object({
       workspaceId: z.string().describe("Sandbox ID"),
@@ -521,7 +521,7 @@ BACKEND (run inside the E2B sandbox):
   edit_file            — search-and-replace inside a file
   exec                 — run a shell command (use background=true for servers)
   get_workspace_info   — check sandbox status
-  download_workspace   — zip the workspace and get a download URL
+  download_workspace   — archive the workspace and get a download URL
 
 FRONTEND ACTIONS (update UI state — no server-side effect):
   add_mcp_server(endpoint, serverId)          — connect sandbox to the sidebar

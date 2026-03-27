@@ -557,7 +557,7 @@ const workspaceTools: Record<string, unknown> = {
 
   download_workspace: {
     description:
-      "Package the current workspace as a zip (excludes node_modules/dist) and return a signed download URL. " +
+      "Package the current workspace as a .tar.gz archive (excludes node_modules/dist) and return a signed download URL. " +
       "Present the URL to the user so they can download their MCP server.",
     parameters: z.object({
       workspaceId: z.string().describe("Sandbox ID"),

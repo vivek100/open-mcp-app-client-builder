@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProvider } from "@/lib/workspace";
 
+export const maxDuration = 300;
+
 export async function POST(req: NextRequest) {
   try {
     const { name } = (await req.json()) as { name?: string };

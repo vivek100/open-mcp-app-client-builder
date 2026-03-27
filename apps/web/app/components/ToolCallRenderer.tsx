@@ -3,6 +3,7 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { defineToolCallRenderer } from "@copilotkit/react-core/v2";
 import { z } from "zod";
+import { navigateTabOrOpenUrl, openBlankDownloadTab } from "@/lib/open-download";
 
 // ── Download link for restart_server ─────────────────────────────────────────
 
@@ -13,16 +14,23 @@ function DownloadServerCodeLink({ workspaceId }: { workspaceId: string }) {
   const handleDownload = async () => {
     setError(null);
     setLoading(true);
+    const tab = openBlankDownloadTab();
     try {
       const res = await fetch("/api/workspace/download", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ workspaceId }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Download failed");
-      if (data.downloadUrl) window.open(data.downloadUrl, "_blank");
-      else throw new Error("No download URL returned");
+      const data = (await res.json()) as { downloadUrl?: string; error?: string };
+      if (!res.ok) {
+        tab?.close();
+        throw new Error(data.error || `Download failed (${res.status})`);
+      }
+      if (!data.downloadUrl) {
+        tab?.close();
+        throw new Error("No download URL returned");
+      }
+      navigateTabOrOpenUrl(tab, data.downloadUrl);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Download failed");
     } finally {

@@ -130,13 +130,26 @@ export class E2BWorkspaceProvider implements WorkspaceProvider {
 
   async prepareDownload(workspaceId: string): Promise<{ downloadUrl: string }> {
     const sandbox = await Sandbox.connect(workspaceId);
-    // Clean up heavy dirs, then zip the workspace
-    await sandbox.commands.run(
-      `cd ${WORKSPACE_PATH} && rm -rf node_modules dist .agent && ` +
-        `cd /home/user && zip -r workspace.zip workspace`,
+    // Strip heavy dirs, then archive with tar (GNU zip is often missing → exit 127 on `zip`).
+    const clean = await sandbox.commands.run(
+      `cd ${WORKSPACE_PATH} && rm -rf node_modules dist .agent`,
+      { timeoutMs: 120_000 }
+    );
+    if (clean.exitCode !== 0) {
+      throw new Error(
+        `Failed to prepare workspace for download: ${clean.stderr || clean.stdout || "unknown error"}`
+      );
+    }
+    const archive = await sandbox.commands.run(
+      `cd /home/user && rm -f workspace.tar.gz workspace.zip && tar -czf workspace.tar.gz workspace`,
       { timeoutMs: 5 * 60_000 }
     );
-    const url = await sandbox.downloadUrl("/home/user/workspace.zip");
+    if (archive.exitCode !== 0) {
+      throw new Error(
+        `Archive failed (exit ${archive.exitCode}): ${archive.stderr || archive.stdout || "is tar available?"}`
+      );
+    }
+    const url = await sandbox.downloadUrl("/home/user/workspace.tar.gz");
     return { downloadUrl: url };
   }
 

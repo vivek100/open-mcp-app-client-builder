@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useCopilotChat } from "@copilotkit/react-core";
 import { useMcpServers } from "./CopilotKitProvider";
 import { DEFAULT_SERVERS, type McpServerEntry } from "../constants/mcpServers";
+import { navigateTabOrOpenUrl, openBlankDownloadTab } from "@/lib/open-download";
 import type { WorkspaceInfo } from "@/lib/workspace/types";
 import type { ServerIntrospection } from "../hooks/useMcpIntrospect";
 
@@ -80,6 +81,7 @@ export function McpServerManager({
   globalLoading?: boolean;
 }) {
   const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   // Single source of truth: React context owned by DynamicCopilotKitProvider
   const { servers, setServers } = useMcpServers();
   const [showAddForm, setShowAddForm] = useState(false);
@@ -149,6 +151,12 @@ export function McpServerManager({
         <AddServerForm onAdd={addServer} onCancel={() => setShowAddForm(false)} />
       )}
 
+      {downloadError && (
+        <p className="rounded-lg border border-red-200 bg-red-50 px-2 py-1.5 text-xs text-red-700">
+          {downloadError}
+        </p>
+      )}
+
       <ul className="space-y-1.5">
         {servers.map((s, i) => {
           const isWorkspace = activeWorkspace?.endpoint === s.endpoint;
@@ -160,15 +168,34 @@ export function McpServerManager({
 
           const handleDownload = async () => {
             if (!activeWorkspace) return;
+            setDownloadError(null);
             setDownloading(true);
+            const tab = openBlankDownloadTab();
             try {
               const res = await fetch("/api/workspace/download", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ workspaceId: activeWorkspace.workspaceId }),
               });
-              const { downloadUrl } = await res.json();
-              window.open(downloadUrl, "_blank");
+              const body = (await res.json()) as { downloadUrl?: string; error?: string };
+              if (!res.ok) {
+                tab?.close();
+                setDownloadError(body.error || `Download failed (${res.status})`);
+                return;
+              }
+              if (!body.downloadUrl) {
+                tab?.close();
+                setDownloadError("No download URL returned");
+                return;
+              }
+              navigateTabOrOpenUrl(tab, body.downloadUrl);
+            } catch (e) {
+              try {
+                tab?.close();
+              } catch {
+                /* ignore */
+              }
+              setDownloadError(e instanceof Error ? e.message : "Download failed");
             } finally {
               setDownloading(false);
             }
@@ -244,7 +271,7 @@ export function McpServerManager({
                     disabled={downloading}
                     className="rounded-lg p-1.5 text-slate-400 hover:bg-emerald-100 hover:text-emerald-700 disabled:opacity-50"
                     aria-label="Download workspace"
-                    title="Download workspace as zip"
+                    title="Download workspace (.tar.gz)"
                   >
                     {downloading ? (
                       <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">

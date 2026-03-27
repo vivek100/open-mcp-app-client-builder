@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProvider } from "@/lib/workspace";
 
+/** E2B archive + signed URL can exceed the default 10s Vercel limit. */
+export const maxDuration = 300;
+
 export async function POST(req: NextRequest) {
   try {
     const { workspaceId } = (await req.json()) as { workspaceId?: string };
