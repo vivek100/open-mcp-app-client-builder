@@ -11,7 +11,7 @@
  *  exec (bg)    → sandbox.commands.run background
  *  get_info     → Sandbox.connect (reconnect by sandboxId)
  *  mcp-introspect → tools/list + readResource for UI tools
- *  download     → zip workspace + downloadUrl
+ *  download     → tar.gz workspace + downloadUrl (same as e2b.ts; zip often missing in image)
  */
 
 import { Sandbox } from "e2b";
@@ -297,20 +297,30 @@ try {
   }
 } catch (e) { fail("mcp-introspect", e); }
 
-// ── [12] download_workspace — zip + download URL ─────────────────────────────
-console.log("\n[12] download_workspace — zip and get URL");
+// ── [12] download_workspace — tar.gz + download URL (matches lib/workspace/e2b.ts) ──
+console.log("\n[12] download_workspace — tar.gz and get URL");
 try {
-  const zip = await sandbox.commands.run(
-    `cd ${WORKSPACE_PATH} && rm -rf node_modules dist .agent && ` +
-    `cd /home/user && zip -r workspace.zip workspace`,
+  const clean = await sandbox.commands.run(
+    `cd ${WORKSPACE_PATH} && rm -rf node_modules dist .agent`,
+    { timeoutMs: 120_000 }
+  );
+  if (clean.exitCode !== 0) throw new Error(`clean failed: ${clean.stderr}`);
+  ok("workspace cleaned (node_modules + dist + .agent removed)");
+
+  const archive = await sandbox.commands.run(
+    `cd /home/user && rm -f workspace.tar.gz workspace.zip && tar -czf workspace.tar.gz workspace`,
     { timeoutMs: 5 * 60_000 }
   );
-  if (zip.exitCode !== 0) throw new Error(`zip failed: ${zip.stderr}`);
-  ok("workspace zipped (node_modules + dist excluded)");
+  if (archive.exitCode !== 0) throw new Error(`tar failed: ${archive.stderr || archive.stdout}`);
+  ok("workspace archived as workspace.tar.gz");
 
-  const url = await sandbox.downloadUrl("/home/user/workspace.zip");
+  const url = await sandbox.downloadUrl("/home/user/workspace.tar.gz");
   if (url.startsWith("http")) {
     ok(`downloadUrl — got signed URL (${url.length} chars)`);
+    const head = await fetch(url, { method: "GET", redirect: "follow" });
+    const bytes = (await head.arrayBuffer()).byteLength;
+    if (head.ok && bytes > 64) ok(`GET signed URL — ${head.status}, ${bytes} bytes`);
+    else fail("GET signed URL", new Error(`${head.status}, ${bytes} bytes`));
   } else {
     fail("downloadUrl", new Error(`Unexpected URL: ${url}`));
   }

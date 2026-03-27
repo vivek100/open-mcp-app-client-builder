@@ -1,33 +1,15 @@
 /**
- * Signed download URLs after async fetch: open a tab synchronously (user gesture),
- * then assign the URL so popup blockers do not block the download.
+ * Save a Blob as a file using the browser download path (no pop-up).
+ * Works after async fetch when the response is same-origin (e.g. /api/workspace/download?stream).
  */
-export function openBlankDownloadTab(): Window | null {
-  try {
-    return window.open("about:blank", "_blank", "noopener,noreferrer");
-  } catch {
-    return null;
-  }
-}
-
-export function navigateTabOrOpenUrl(tab: Window | null, url: string): void {
-  if (tab && !tab.closed) {
-    try {
-      tab.location.href = url;
-      return;
-    } catch {
-      try {
-        tab.close();
-      } catch {
-        /* ignore */
-      }
-    }
-  }
+export function triggerBlobDownload(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
+  a.download = filename;
+  a.rel = "noopener";
   document.body.appendChild(a);
   a.click();
   a.remove();
+  URL.revokeObjectURL(url);
 }

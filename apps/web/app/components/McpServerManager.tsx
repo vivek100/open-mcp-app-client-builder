@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useCopilotChat } from "@copilotkit/react-core";
 import { useMcpServers } from "./CopilotKitProvider";
 import { DEFAULT_SERVERS, type McpServerEntry } from "../constants/mcpServers";
-import { navigateTabOrOpenUrl, openBlankDownloadTab } from "@/lib/open-download";
+import { triggerBlobDownload } from "@/lib/open-download";
 import type { WorkspaceInfo } from "@/lib/workspace/types";
 import type { ServerIntrospection } from "../hooks/useMcpIntrospect";
 
@@ -170,31 +170,22 @@ export function McpServerManager({
             if (!activeWorkspace) return;
             setDownloadError(null);
             setDownloading(true);
-            const tab = openBlankDownloadTab();
+            const wid = activeWorkspace.workspaceId;
             try {
               const res = await fetch("/api/workspace/download", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ workspaceId: activeWorkspace.workspaceId }),
+                body: JSON.stringify({ workspaceId: wid, stream: true }),
               });
-              const body = (await res.json()) as { downloadUrl?: string; error?: string };
               if (!res.ok) {
-                tab?.close();
+                const body = (await res.json().catch(() => ({}))) as { error?: string };
                 setDownloadError(body.error || `Download failed (${res.status})`);
                 return;
               }
-              if (!body.downloadUrl) {
-                tab?.close();
-                setDownloadError("No download URL returned");
-                return;
-              }
-              navigateTabOrOpenUrl(tab, body.downloadUrl);
+              const blob = await res.blob();
+              const safeId = wid.replace(/[^\w-]/g, "").slice(0, 16) || "workspace";
+              triggerBlobDownload(blob, `workspace-${safeId}.tar.gz`);
             } catch (e) {
-              try {
-                tab?.close();
-              } catch {
-                /* ignore */
-              }
               setDownloadError(e instanceof Error ? e.message : "Download failed");
             } finally {
               setDownloading(false);
