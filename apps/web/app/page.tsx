@@ -86,27 +86,31 @@ function TopBar() {
 
   return (
     <nav className="mx-auto mb-3 flex w-full max-w-[1800px] shrink-0 items-center gap-4 border-b border-slate-200/80 pb-3">
-      <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
-        <a
-          href={docsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="shrink-0 rounded-lg outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-400"
-          aria-label="CopilotKit — open documentation"
-        >
-          <Image
-            src={copilotKitLogo}
-            alt="CopilotKit"
-            width={copilotKitLogo.width}
-            height={copilotKitLogo.height}
-            className="h-7 w-auto max-w-[min(200px,52vw)] sm:h-8 sm:max-w-[220px]"
-            priority
-            sizes="(max-width: 640px) 50vw, 220px"
-          />
-        </a>
-        <div className="min-w-0 border-l border-slate-200 pl-3 sm:pl-4">
-          <p className="truncate text-sm font-semibold tracking-tight text-slate-900">MCP App builder</p>
-          <p className="text-[11px] font-medium text-slate-500">Powered by CopilotKit</p>
+      <div className="flex min-w-0 flex-1 items-center">
+        <div className="min-w-0">
+          <p className="text-base font-semibold leading-tight tracking-tight text-slate-900 sm:text-lg">
+            MCP App builder
+          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="text-[11px] font-medium text-slate-500 sm:text-xs">Powered by</span>
+            <a
+              href={docsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 rounded-md outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-400"
+              aria-label="CopilotKit — open documentation"
+            >
+              <Image
+                src={copilotKitLogo}
+                alt=""
+                width={copilotKitLogo.width}
+                height={copilotKitLogo.height}
+                className="h-[22px] w-auto max-w-[min(200px,45vw)] sm:h-7 sm:max-w-[220px]"
+                priority
+                sizes="(max-width: 640px) 45vw, 220px"
+              />
+            </a>
+          </div>
         </div>
       </div>
 
@@ -293,7 +297,6 @@ function StudioView({
         </div>
       </div>
       <div className="chat-container min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-        <ChatSuggestions />
         <CopilotChat
           className="h-full w-full"
           labels={CHAT_LABELS}
@@ -328,6 +331,11 @@ function StudioView({
       activeWorkspace={activeWorkspace}
       onWorkspaceChange={setActiveWorkspace}
     >
+      {/*
+        Single mount: chatPanel is rendered twice (mobile + desktop layouts) but only one is visible.
+        Registering suggestions in each instance duplicated chips in CopilotKit.
+      */}
+      <ChatSuggestions />
       {/* Mobile (<768px): 2-tab switcher */}
       <div className="mobile-layout flex h-full min-h-0 flex-col gap-2">
         <nav className="glass-panel shrink-0 rounded-2xl p-1">

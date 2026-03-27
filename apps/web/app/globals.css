@@ -105,3 +105,11 @@ body > div:first-child {
   display: block;
   height: 5rem;
 }
+
+/* Starter chips: show short label only; truncate if title is long (message is sent on click, not shown). */
+.chat-container [data-slot="suggestion-pill"] > span:last-child {
+  max-width: min(11rem, 32vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

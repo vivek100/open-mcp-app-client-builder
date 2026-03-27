@@ -35,8 +35,21 @@ export function getChatStarterPrompts(): ChatStarterPrompt[] {
       if (!t || !m) continue;
       out.push({ title: t, message: m });
     }
-    return out.length > 0 ? out : DEFAULT_PROMPTS;
+    return dedupeStarterPrompts(out.length > 0 ? out : DEFAULT_PROMPTS);
   } catch {
     return DEFAULT_PROMPTS;
   }
+}
+
+/** Drop duplicate title+message pairs (e.g. mis-merged env) so the UI does not repeat chips. */
+function dedupeStarterPrompts(prompts: ChatStarterPrompt[]): ChatStarterPrompt[] {
+  const seen = new Set<string>();
+  const result: ChatStarterPrompt[] = [];
+  for (const p of prompts) {
+    const key = `${p.title.trim()}\n${p.message.trim()}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(p);
+  }
+  return result;
 }

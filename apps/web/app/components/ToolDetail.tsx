@@ -316,7 +316,7 @@ export function ToolDetailModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="tool-detail-modal-title"
-        className="relative flex max-h-[92dvh] w-full max-w-[min(100vw,44rem)] flex-col rounded-t-2xl border border-slate-200 bg-white shadow-2xl sm:max-h-[min(92dvh,840px)] sm:rounded-2xl"
+        className="relative flex h-[min(88dvh,820px)] w-full max-w-[min(100vw,44rem)] flex-col rounded-t-2xl border border-slate-200 bg-white shadow-2xl sm:rounded-2xl"
       >
         <header className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 sm:px-5">
           <div className="min-w-0 flex-1">
