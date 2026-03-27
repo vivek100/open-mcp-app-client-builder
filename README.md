@@ -1,5 +1,7 @@
 # CopilotKit <> MCP Apps Starter
 
+**Primary handoff document (share with CopilotKit / stakeholders): [`docs/TRACKER.md`](docs/TRACKER.md)** — fixes shipped, production checklist, env defaults, and review asks.
+
 This repository demonstrates how to integrate MCP Apps with CopilotKit. It uses the [Three.js example](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/threejs-server) from the official Model Context Protocol organization on GitHub.
 
 
@@ -63,9 +65,11 @@ The following scripts can also be run using your preferred package manager:
 
 ## Agent and UI
 
-The web app is titled **MCP App builder** and uses the Mastra-based agent only (`/api/mastra-agent`). The original CopilotKit route remains at `apps/web/app/api/copilotkit/route.ts` for reference.
+The web app is titled **MCP App builder** (subtitle **Powered by CopilotKit**), shows the CopilotKit logo from `apps/web/app/image.png`, and uses the Mastra-based agent only (`/api/mastra-agent`). Header links and labels are configurable via `NEXT_PUBLIC_HEADER_*` (docs URL, primary/secondary labels, secondary URL — or `NEXT_PUBLIC_GITHUB_REPO_URL` for the second link). Chat starter chips use **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** (JSON array of `{ title, message }`) with **built-in defaults if unset** — see `.env.example` and **`docs/TRACKER.md`** (defaults table). The original CopilotKit route remains at `apps/web/app/api/copilotkit/route.ts` for reference.
 
-- **restart_server tool**: When the agent runs `restart_server`, the chat UI shows a **Download MCP server code** link so users can download the current workspace (MCP server code) as a zip.
+**Starter prompts** in the chat are configured with CopilotKit’s `useCopilotChatSuggestions` (`apps/web/app/components/ChatSuggestions.tsx`) so v2 `CopilotChat` shows the framework’s suggestion pills instead of a separate row of buttons above the chat.
+
+- **restart_server tool**: When the agent runs `restart_server`, the chat UI supports downloading the current workspace (MCP server code) as **`.tar.gz`** (hosted-friendly blob download).
 
 ### Duplicate React keys (Mastra agent) — RCA and fix
 
@@ -75,7 +79,7 @@ When the Mastra agent streams responses, you may see React warnings: *"Encounter
 
 The app includes a **left panel** for managing MCP servers and testing tools:
 
-- **MCP servers**: Add or remove MCP servers by endpoint URL (and optional server ID). The list is synced to the agent via `x-mcp-servers` and persisted in memory. The default Three.js server (`http://localhost:3108/mcp`) is pre-configured.
+- **MCP servers**: Add or remove MCP servers by endpoint URL (and optional server ID). The list is synced to the agent via `x-mcp-servers` and persisted in memory. The default Three.js server (`http://localhost:3108/mcp`) is pre-configured. The sidebar uses minimal chrome: **+ Add** for new servers (no list-level Reset); the top bar shows branding + header CTAs.
 - **Test MCP tools**: Suggested prompts to try in the chat (e.g. "Show me a rotating cube with Three.js", "Use learn_threejs to get documentation").
 
 To use: run `pnpm dev` from the repo root, open the app, and use the left panel to add servers or follow the test suggestions in the chat.

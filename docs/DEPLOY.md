@@ -55,6 +55,16 @@ When deployed, the app does not run local MCP servers. You can connect **openly 
 | `DEFAULT_MCP_SERVERS` | JSON array | API fallback when no header. e.g. `[{"type":"http","url":"https://your-mcp.example.com/mcp","serverId":"my-mcp"}]` |
 | `NEXT_PUBLIC_DEFAULT_MCP_SERVERS` | JSON array | Initial sidebar list in the UI. e.g. `[{"endpoint":"https://your-mcp.example.com/mcp","serverId":"my-mcp"}]`. Use `[]` to start with no servers; users can add URLs in the sidebar. |
 
+**Optional — header & chat copy (no secrets):**
+
+| Name | Value | Notes |
+|------|-------|-------|
+| `NEXT_PUBLIC_HEADER_DOCS_URL` | URL | Primary CTA + logo link; defaults to CopilotKit docs |
+| `NEXT_PUBLIC_HEADER_PRIMARY_CTA_LABEL` | string | Primary pill text; default `CopilotKit docs` |
+| `NEXT_PUBLIC_HEADER_SECONDARY_CTA_URL` | URL | Second pill (e.g. GitHub). `NEXT_PUBLIC_GITHUB_REPO_URL` is an alias |
+| `NEXT_PUBLIC_HEADER_SECONDARY_CTA_LABEL` | string | Second pill text; default `GitHub` |
+| `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` | JSON array | `[{"title":"…","message":"…"},…]` for CopilotKit suggestion chips; built-in defaults if unset |
+
 There is no widely available **publicly hosted Three.js MCP** HTTP endpoint; registries like [mcp.pizza](https://www.mcp.pizza) list run-your-own servers. You can host your own or add any public MCP URL in the app’s MCP servers panel after deploy.
 
 > **Tip:** Use Vercel’s bulk import (paste `KEY=value` lines) for multiple variables.
@@ -75,12 +85,12 @@ First deploy takes ~2 minutes.
 ## Step 5 — Verify
 
 Open the deployed URL. You should see:
-- The MCP UI Studio layout (sidebar + chat)
-- A greeting message in the chat: *"Hi! I'm the MCP UI Studio agent…"*
-- Three starter prompt chips above the input
+- The MCP App builder layout (sidebar + chat) and branded header
+- A greeting message in the chat (*MCP App builder* welcome text)
+- Starter suggestion chips from CopilotKit (defaults or `NEXT_PUBLIC_CHAT_STARTER_PROMPTS`)
 
 Test the full flow:
-1. Click **"Build a crypto price widget"**
+1. Click a starter suggestion (e.g. **tic tac toe** / **flow charts**) or type your own prompt
 2. The agent should call `provision_workspace` → sidebar shows **"Setting up…"** badge
 3. After ~5-10s: badge turns green **"Running"** (fast because `E2B_TEMPLATE` has everything pre-installed)
 4. New MCP tools appear in the sidebar after the agent calls `refresh_mcp_tools`

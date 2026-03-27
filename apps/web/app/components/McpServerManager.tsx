@@ -3,13 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useCopilotChat } from "@copilotkit/react-core";
 import { useMcpServers } from "./CopilotKitProvider";
-import { DEFAULT_SERVERS, type McpServerEntry } from "../constants/mcpServers";
+import type { McpServerEntry } from "../constants/mcpServers";
 import { triggerBlobDownload } from "@/lib/open-download";
 import type { WorkspaceInfo } from "@/lib/workspace/types";
 import type { ServerIntrospection } from "../hooks/useMcpIntrospect";
 
 export type { McpServerEntry };
-export { DEFAULT_SERVERS };
+export { DEFAULT_SERVERS } from "../constants/mcpServers";
 
 function AddServerForm({
   onAdd,
@@ -119,32 +119,19 @@ export function McpServerManager({
     setServers(servers.filter((_, i) => i !== index));
   };
 
-  const resetToDefaults = () => {
-    setServers(DEFAULT_SERVERS);
-  };
-
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-800">
           MCP servers
         </h2>
-        <div className="flex gap-1">
-          <button
-            type="button"
-            onClick={() => setShowAddForm((v: boolean) => !v)}
-            className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
-          >
-            {showAddForm ? "Cancel" : "+ Add"}
-          </button>
-          <button
-            type="button"
-            onClick={resetToDefaults}
-            className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100"
-          >
-            Reset
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowAddForm((v: boolean) => !v)}
+          className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+        >
+          {showAddForm ? "Cancel" : "+ Add"}
+        </button>
       </div>
 
       {showAddForm && (
