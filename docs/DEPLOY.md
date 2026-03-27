@@ -61,9 +61,9 @@ When deployed, the app does not run local MCP servers. You can connect **openly 
 |------|-------|-------|
 | `NEXT_PUBLIC_HEADER_DOCS_URL` | URL | Primary CTA + logo link; defaults to CopilotKit docs |
 | `NEXT_PUBLIC_HEADER_PRIMARY_CTA_LABEL` | string | Primary pill text; default `CopilotKit docs` |
-| `NEXT_PUBLIC_HEADER_SECONDARY_CTA_URL` | URL | Second pill (e.g. GitHub). `NEXT_PUBLIC_GITHUB_REPO_URL` is an alias |
+| `NEXT_PUBLIC_HEADER_SECONDARY_CTA_URL` | URL | Second pill (e.g. GitHub); alias `NEXT_PUBLIC_GITHUB_REPO_URL`. Default in code: `vivek100/open-mcp-app-client-builder` |
 | `NEXT_PUBLIC_HEADER_SECONDARY_CTA_LABEL` | string | Second pill text; default `GitHub` |
-| `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` | JSON array | `[{"title":"…","message":"…"},…]` for CopilotKit suggestion chips; built-in defaults if unset |
+| `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` | JSON array | Starter chips; if unset, **two** built-in prompts (tic tac toe, flow charts) — add a third when product decides |
 
 There is no widely available **publicly hosted Three.js MCP** HTTP endpoint; registries like [mcp.pizza](https://www.mcp.pizza) list run-your-own servers. You can host your own or add any public MCP URL in the app’s MCP servers panel after deploy.
 
@@ -87,7 +87,7 @@ First deploy takes ~2 minutes.
 Open the deployed URL. You should see:
 - The MCP App builder layout (sidebar + chat) and branded header
 - A greeting message in the chat (*MCP App builder* welcome text)
-- Starter suggestion chips from CopilotKit (defaults or `NEXT_PUBLIC_CHAT_STARTER_PROMPTS`)
+- Starter suggestion chips from CopilotKit (by default **two** prompts, or override with `NEXT_PUBLIC_CHAT_STARTER_PROMPTS`)
 
 Test the full flow:
 1. Click a starter suggestion (e.g. **tic tac toe** / **flow charts**) or type your own prompt

@@ -3,10 +3,10 @@ export type ChatStarterPrompt = {
   message: string;
 };
 
+/** Two agreed starters; add a third via `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` when product decides. */
 const DEFAULT_PROMPTS: ChatStarterPrompt[] = [
   { title: "Tic tac toe", message: "Create a tic tac toe game" },
   { title: "Flow charts", message: "Create an app that creates flow charts" },
-  { title: "Stock chart", message: "Build a stock chart widget" },
 ];
 
 /**

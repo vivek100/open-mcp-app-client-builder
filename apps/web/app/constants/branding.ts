@@ -1,5 +1,6 @@
 const DEFAULT_DOCS_URL = "https://docs.copilotkit.ai/";
-const DEFAULT_SECONDARY_URL = "https://github.com/CopilotKit/CopilotKit";
+/** Demo repo (vivek100); override via `NEXT_PUBLIC_HEADER_SECONDARY_CTA_URL` or `NEXT_PUBLIC_GITHUB_REPO_URL`. */
+const DEFAULT_SECONDARY_URL = "https://github.com/vivek100/open-mcp-app-client-builder";
 const DEFAULT_SECONDARY_LABEL = "GitHub";
 
 /** Header / logo primary link — CopilotKit docs by default. */

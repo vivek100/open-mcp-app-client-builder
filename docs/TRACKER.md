@@ -1,35 +1,32 @@
 # MCP App client builder — handoff & tracker
 
-**This file is the main document** we share with **CopilotKit** and our team. It summarizes **what we fixed**, **how to ship to production**, **defaults for optional env vars**, and **open decisions / review items**. Operational detail for Vercel import lives in [`DEPLOY.md`](DEPLOY.md). Day-to-day developer setup stays in the root [`README.md`](../README.md) (keep that README in sync with this tracker when onboarding or rebranding).
+**This file is the main document** we share with **CopilotKit** and our team. It summarizes **what we shipped** (checklist), **how to go live on Vercel** (including review before sign-off), and **decisions we need from CopilotKit**. Operational steps: [`DEPLOY.md`](DEPLOY.md). Developer setup: root [`README.md`](../README.md).
 
 ---
 
-## Recent changes & issues fixed
+## Shipped work (from original product list)
 
-- **Tools UI** — Sidebar is a compact tool list only; clicking a tool opens **`ToolDetailModal`** with Preview-first tabs (schema, prompts, etc.).
-- **Chat starters** — Example prompts live **inside** CopilotKit v2 chat via **`useCopilotChatSuggestions`** (`apps/web/app/components/ChatSuggestions.tsx`). Optional env: **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** (JSON). If unset or invalid, **code defaults** apply (tic tac toe, flow charts, stock chart) — see [`chatStarters.ts`](../apps/web/app/constants/chatStarters.ts).
-- **Header & branding** — CopilotKit wordmark (`apps/web/app/image.png`), product title **MCP App builder**, subtitle **Powered by CopilotKit**, two header CTAs. URLs/labels are env-driven with **defaults** — [`branding.ts`](../apps/web/app/constants/branding.ts).
-- **Trimmed chrome** — Top bar is branding + CTAs only (no global Refresh/tool count/Live). MCP panel: **+ Add** only (**Reset** removed). Tools panel: no **+ New** / **Refresh** header actions (local create-tool form removed; agent/MCP drive tools).
-- **Hosted workspace download** — Sandboxes package **`.tar.gz`** (no `zip`); download uses **same-origin stream + blob** so hosted (e.g. Vercel) is not blocked by pop-up rules.
-- **Mastra stream / React keys** — Duplicate message ids from Mastra streams caused duplicate React keys; **remapped ids** in `apps/web/app/api/mastra-agent/route.ts` (see README “Duplicate React keys” for RCA).
-- **Optional `NEXT_PUBLIC_*` branding/prompts** — **No env required** for local dev; all new keys fall back to sensible defaults in code (table below).
+- [x] **UI / sidebar — MCP tools**  
+  For MCP App servers in the sidebar, show **only a compact tool list**; the user **opens details** (description, schema, preview, etc.) in a **modal** instead of a heavy inline preview. *`ToolDetailModal` + `page.tsx`.*
 
----
+- [x] **Branding & header — title**  
+  Visible **MCP App builder** with subtitle **Powered by CopilotKit**; browser title in `app/layout.tsx`. Logo: `apps/web/app/image.png`.
 
-## Optional env variables — defaults in code
+- [x] **Branding & header — top-right CTAs (two)**  
+  **CopilotKit docs** + **GitHub** (URLs/labels overridable via `NEXT_PUBLIC_*`; code default GitHub target is **this demo repo** — see *Input requested from CopilotKit*). *`branding.ts`, `page.tsx`.*
 
-These are **safe to omit**. Values are applied at build time on Vercel for `NEXT_PUBLIC_*`.
+- [x] **Trim chrome**  
+  Top bar: branding + CTAs (no global Refresh / tool count / Live). MCP servers: **+ Add** only (**Reset** removed). Tools section: no **+ New** / **Refresh** in the header. *`McpServerManager.tsx`, `page.tsx`.*
 
-| Variable | Default when unset |
-|----------|---------------------|
-| `NEXT_PUBLIC_HEADER_DOCS_URL` | `https://docs.copilotkit.ai/` |
-| `NEXT_PUBLIC_HEADER_PRIMARY_CTA_LABEL` | `CopilotKit docs` |
-| `NEXT_PUBLIC_HEADER_SECONDARY_CTA_URL` | Uses `NEXT_PUBLIC_GITHUB_REPO_URL` if set; else see next row |
-| `NEXT_PUBLIC_GITHUB_REPO_URL` | If both secondary URL vars unset: `https://github.com/CopilotKit/CopilotKit` |
-| `NEXT_PUBLIC_HEADER_SECONDARY_CTA_LABEL` | `GitHub` |
-| `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` | Three built-in prompts (tic tac toe, flow charts, stock chart) |
+- [x] **Chat — starter / example prompts in the chat surface**  
+  Suggestions use CopilotKit **`useCopilotChatSuggestions`** with v2 **`CopilotChat`** (`ChatSuggestions.tsx`). Optional override: `NEXT_PUBLIC_CHAT_STARTER_PROMPTS`.
 
-Invalid JSON for chat starters falls back to the same built-in defaults.
+- [x] **Hosted / reliability — download on Vercel**  
+  Workspace download as **`.tar.gz`**, **stream + blob** same-origin (no `zip` / pop-up issues).
+
+**Additional fixes (not on the original checklist):**
+
+- [x] **Mastra stream ↔ duplicate React keys** — Message id remapping in `apps/web/app/api/mastra-agent/route.ts` (RCA in README).
 
 ---
 
@@ -55,8 +52,8 @@ Use **Vercel → Project → Settings → Environment Variables** (at least **Pr
 
 ### Branding & copy (public env)
 
-- [ ] **Header URLs/labels** — set `NEXT_PUBLIC_HEADER_*` and/or `NEXT_PUBLIC_GITHUB_REPO_URL` if defaults are not right for the demo
-- [ ] **Chat starters** — `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` if defaults are not right for the story
+- [ ] **Header URLs/labels** — Override `NEXT_PUBLIC_HEADER_*` / `NEXT_PUBLIC_GITHUB_REPO_URL` if the demo should not use code defaults
+- [ ] **Chat starters** — Set `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` when the three final prompts are decided (see *Input requested*)
 
 ### Smoke test after deploy
 
@@ -65,43 +62,30 @@ Use **Vercel → Project → Settings → Environment Variables** (at least **Pr
 - [ ] If E2B enabled: provision completes; tools appear after refresh
 - [ ] Download workspace (`.tar.gz`) works for a running sandbox
 
+### Review before sign-off
+
+- [ ] **README** — Root [`README.md`](../README.md) matches this tracker (stack, E2B, MCP UI, **tar.gz** download). Fix sections that contradict this doc.
+- [ ] **DEPLOY.md** — Tables and verify steps match current env vars and UI
+- [ ] **`.env.example`** — Documents `NEXT_PUBLIC_*` options; file is tracked (`!.env.example` in `.gitignore`)
+- [ ] **End-to-end** — One full production path: chat → provision (if E2B) → tools → download
+- [ ] **Vendor marks** — CopilotKit **name/logo** usage passes your design/legal bar if required
+
 **Step-by-step import:** [`DEPLOY.md`](DEPLOY.md).
 
 ---
 
 ## Input requested from CopilotKit
 
-Items we’d like **alignment or guidance** on:
+- [ ] **Branding** — OK to ship **Powered by CopilotKit** + logo in header as implemented? Preferred wording or placement changes?
 
-- [ ] **Branding** — OK to ship **Powered by CopilotKit** + official-style logo in header as implemented? Any preferred wording or placement?
-- [ ] **Default secondary CTA** — Code default is **`https://github.com/CopilotKit/CopilotKit`**. Should the public demo instead deep-link a **specific repo**, **docs only**, or a **CopilotKit-owned** showcase URL?
-- [ ] **Hosted MCP demos** — Any **recommended public HTTP MCP endpoint(s)** we should pre-wire for hosted demos (or explicit “none” / bring-your-own guidance)?
-- [ ] **CopilotKit v2 patterns** — `CopilotChat` (v2) + `useCopilotChatSuggestions` — anything we should change to match **current best practice** or upcoming deprecations?
-- [ ] **Attribution / license** — Any **required** footer, README, or third-party notice beyond what we have?
+- [ ] **GitHub / secondary CTA** — The header **GitHub** pill currently defaults to **`https://github.com/vivek100/open-mcp-app-client-builder`**. Should the **public** demo instead point to a repo on **CopilotKit’s org/account**, stay on this repo, or use another URL? (All overridable via env.)
 
----
+- [ ] **Default MCP for hosted demos** — Will you **provide or recommend a default MCP server** for new users (sidebar and/or API fallback)? **Which HTTP MCP URL** (if any), vs **empty / BYO only**? Should docs mention any **other public demo endpoints**, or only bring-your-own? Align `NEXT_PUBLIC_DEFAULT_MCP_SERVERS`, `DEFAULT_MCP_SERVERS`, README, and `DEPLOY.md`.
 
-## Review checklist (our team & CopilotKit)
+- [ ] **The three chat starter prompts** — **Two** are set: **tic tac toe** and **flow charts** (`chatStarters.ts`). The **third is TBD**. What should the **full set of three** be for the public demo (short **title** + full **message** for each)?
 
-- [ ] **README** — Review root [`README.md`](../README.md) for accuracy vs this tracker (stack, deploy pointer, E2B, MCP UI, download format **tar.gz**). Treat **this tracker** as source of truth for handoff scope; trim or update README sections that contradict it.
-- [ ] **DEPLOY.md** — Tables and verify steps match latest env vars and UI behavior.
-- [ ] **`.env.example`** — Present in repo and documents all optional `NEXT_PUBLIC_*` keys (gitignore allows `!.env.example`).
-- [ ] **End-to-end smoke** — One full path on production: chat → provision (if E2B) → tools → download.
-- [ ] **Vendor marks** — Quick pass on CopilotKit **name/logo** usage with your legal/design standards if required.
+- [ ] **CopilotKit v2** — `CopilotChat` (v2) + `useCopilotChatSuggestions` — anything to adjust for **current best practice** or upcoming deprecations?
 
 ---
 
-## Implemented scope (reference)
-
-| Area | Status | Notes |
-|------|--------|--------|
-| Tools list + modal detail | Done | `ToolDetail.tsx`, `page.tsx` |
-| Chat suggestions (framework-native) | Done | `ChatSuggestions.tsx`, `chatStarters.ts` |
-| Header branding + env CTAs | Done | `page.tsx`, `branding.ts`, `image.png` |
-| Trim chrome (servers/tools/header) | Done | `McpServerManager.tsx`, `page.tsx` |
-| Hosted download reliability | Done | `e2b`/API download path, client blob |
-| Mastra duplicate keys | Done | `mastra-agent/route.ts` |
-
----
-
-_Last updated: tracker as primary handoff doc; env defaults confirmed in code._
+_Last updated: checklist-style shipped work; production + review merged; GitHub default = vivek100 demo repo; two starters + third TBD._

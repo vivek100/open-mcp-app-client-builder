@@ -65,7 +65,7 @@ The following scripts can also be run using your preferred package manager:
 
 ## Agent and UI
 
-The web app is titled **MCP App builder** (subtitle **Powered by CopilotKit**), shows the CopilotKit logo from `apps/web/app/image.png`, and uses the Mastra-based agent only (`/api/mastra-agent`). Header links and labels are configurable via `NEXT_PUBLIC_HEADER_*` (docs URL, primary/secondary labels, secondary URL — or `NEXT_PUBLIC_GITHUB_REPO_URL` for the second link). Chat starter chips use **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** (JSON array of `{ title, message }`) with **built-in defaults if unset** — see `.env.example` and **`docs/TRACKER.md`** (defaults table). The original CopilotKit route remains at `apps/web/app/api/copilotkit/route.ts` for reference.
+The web app is titled **MCP App builder** (subtitle **Powered by CopilotKit**), shows the CopilotKit logo from `apps/web/app/image.png`, and uses the Mastra-based agent only (`/api/mastra-agent`). Header links and labels are configurable via `NEXT_PUBLIC_HEADER_*` (docs URL, primary/secondary labels, secondary URL — or `NEXT_PUBLIC_GITHUB_REPO_URL` for the second link; code default for GitHub is **this demo repo**). Chat starter chips use **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** (JSON) if set; otherwise **two** built-in examples (tic tac toe, flow charts) — third prompt **TBD**, see **`docs/TRACKER.md`**. The original CopilotKit route remains at `apps/web/app/api/copilotkit/route.ts` for reference.
 
 **Starter prompts** in the chat are configured with CopilotKit’s `useCopilotChatSuggestions` (`apps/web/app/components/ChatSuggestions.tsx`) so v2 `CopilotChat` shows the framework’s suggestion pills instead of a separate row of buttons above the chat.
 
