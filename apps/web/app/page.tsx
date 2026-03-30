@@ -96,7 +96,7 @@ function TopBar() {
   const secondaryUrl = getHeaderSecondaryCtaUrl();
 
   return (
-    <nav className="mx-auto flex w-full max-w-[1800px] shrink-0 items-center justify-between gap-3">
+    <nav className="mx-auto mb-3 flex w-full max-w-[1800px] shrink-0 items-center justify-between gap-3">
       <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
         <span className="shrink-0 text-sm font-semibold leading-none tracking-tight text-slate-900 sm:text-base">
           MCP App builder
