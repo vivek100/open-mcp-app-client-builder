@@ -3,6 +3,7 @@
 import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
 import type { MergedToolConfig } from "../hooks/useToolConfigStore";
 import type { WorkspaceInfo } from "@/lib/workspace/types";
+import { RegisterMcpTestPromptsAction } from "./McpTestPromptsAction";
 
 // ---------------------------------------------------------------------------
 // BuilderAgentProvider
@@ -161,5 +162,10 @@ export function BuilderAgentProvider({
     },
   });
 
-  return <>{children}</>;
+  return (
+    <>
+      <RegisterMcpTestPromptsAction />
+      {children}
+    </>
+  );
 }

@@ -633,13 +633,14 @@ WORKFLOW A — BUILD NEW TOOL (no sandbox yet)
 6. edit_file(path: "index.ts", edits: [import edit, registration edit])
 7. restart_server(workspaceId) — kills old server, rebuilds, polls until healthy. If error, fix code and retry.
 8. refresh_mcp_tools()
-9. Tell user it's live.
+9. show_mcp_test_prompts(prompts_json) — frontend action: pass a JSON array STRING like [{"label":"List tools","message":"List all tools available on the MCP server"},{"label":"…","message":"…"}] so the user gets clickable chips to test the server in the same chat thread.
+10. Tell user it's live.
 
 ═══════════════════════════════════════════════════════════════
 WORKFLOW B — EDIT / ADD TOOL (sandbox running)
 ═══════════════════════════════════════════════════════════════
 Skip 1-3. Edit existing files or add new tool (steps 4-8).
-After any change: restart_server → refresh_mcp_tools.
+After any change: restart_server → refresh_mcp_tools → show_mcp_test_prompts (optional, when new/changed tools should be tried).
 
 ═══════════════════════════════════════════════════════════════
 WORKFLOW C — USE EXISTING MCP TOOL

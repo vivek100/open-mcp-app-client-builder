@@ -69,6 +69,8 @@ The web app is titled **MCP App builder** (subtitle **Powered by CopilotKit**), 
 
 **Starter prompts** in the chat are configured with CopilotKit’s `useCopilotChatSuggestions` (`apps/web/app/components/ChatSuggestions.tsx`) so v2 `CopilotChat` shows the framework’s suggestion pills instead of a separate row of buttons above the chat.
 
+**Post-provision test chips:** The agent can call the frontend action **`show_mcp_test_prompts`** (see `McpTestPromptsAction.tsx`) with a JSON string of `{ label, message }[]` so users get clickable chips that **`appendMessage`** into the same thread (per system prompt in `mastra-agent/route.ts`).
+
 - **restart_server tool**: When the agent runs `restart_server`, the chat UI supports downloading the current workspace (MCP server code) as **`.tar.gz`** (hosted-friendly blob download).
 
 ### Duplicate React keys (Mastra agent) — RCA and fix
