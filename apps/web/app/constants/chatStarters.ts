@@ -3,7 +3,7 @@ export type ChatStarterPrompt = {
   message: string;
 };
 
-/** Three bounded UI demos; override entirely via `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` if needed. */
+/** Four starter prompts: three bounded build demos + one Excalidraw test. Override via `NEXT_PUBLIC_CHAT_STARTER_PROMPTS`. */
 const DEFAULT_PROMPTS: ChatStarterPrompt[] = [
   { title: "Tic tac toe", message: "Create a tic tac toe game" },
   {
@@ -15,6 +15,11 @@ const DEFAULT_PROMPTS: ChatStarterPrompt[] = [
     title: "Dice roller",
     message:
       "Create a dice roller widget: choose number of dice (1–6) and sides (e.g. 4, 6, 8, 10, 12, 20), roll button, and show each die result plus the sum. Use only React and the existing template—no chart or diagram libraries.",
+  },
+  {
+    title: "Try Excalidraw",
+    message:
+      "Use the Excalidraw MCP server to create a simple flowchart showing: Start → Process → Decision (yes/no branches) → End. Show me the result.",
   },
 ];
 
