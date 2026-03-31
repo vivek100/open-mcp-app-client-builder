@@ -548,14 +548,12 @@ export const POST = async (req: NextRequest) => {
     tools: workspaceTools as unknown as ConstructorParameters<typeof BuiltInAgent>[0]["tools"],
   });
 
-  // @ts-expect-error - @ag-ui/client version mismatch between middleware (0.0.42) and runtime (0.0.43)
   agent.use(middleware);
 
   const serviceAdapter = new ExperimentalEmptyAdapter();
 
   const runtime = new CopilotRuntime({
     agents: {
-      // @ts-expect-error - @ag-ui/client version mismatch (0.0.42 vs 0.0.43)
       default: agent,
     },
   });
