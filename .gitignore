@@ -56,3 +56,6 @@ bun.lockb
 
 # Generated at apps/web build (prebuild) for full-kit workspace download
 apps/web/.download-kit/
+
+# Internal docs (uncomment for production deployments)
+# docs/

@@ -2,9 +2,25 @@
 
 ## Prerequisites
 
-- A [Vercel account](https://vercel.com) (free tier works; long-running API routes may need **Pro** — see **Timeouts** below)
+- A [Vercel account](https://vercel.com) (free tier works; long-running API routes need **Pro** for >10s timeout)
 - The repo pushed to GitHub / GitLab / Bitbucket (can be private)
-- Environment variables ready (see below). Copy from **`.env.example`** at the monorepo root and fill in values.
+- Environment variables ready (see below)
+
+---
+
+## Step 0 — Clean up for production (optional)
+
+Before deploying a public-facing instance, you may want to remove internal documentation:
+
+1. **Delete the `docs/` folder** — contains internal planning, handoff notes, and implementation details not needed in production.
+
+2. **Update `.gitignore`** to exclude docs in future commits (if you keep a separate dev branch):
+   ```
+   # Internal docs (remove for production)
+   docs/
+   ```
+
+3. **Update `README.md`** — remove references to internal docs (`docs/PLAN.md`, `docs/HANDOFF.md`, etc.) and keep only user-facing setup instructions.
 
 ---
 
@@ -20,56 +36,50 @@ git remote add origin https://github.com/YOUR_USER/your-repo.git
 git push -u origin main
 ```
 
-If you already have a remote and **`main`**, skip **`git init`** and only push as usual.
+If you already have a remote and **`main`**, skip **`git init`** and push as usual.
 
 ---
 
 ## Step 2 — Import project on Vercel
 
 1. Go to [vercel.com/new](https://vercel.com/new)
-2. Click **Import Git Repository** and select your repo (private repos are supported)
-3. Vercel will auto-detect **Next.js** — keep the defaults unless you know you need overrides
+2. Click **Import Git Repository** and select your repo
+3. Vercel will auto-detect **Next.js** — keep the defaults
 4. Set **Root Directory**:
-   - Repo root is **`with-mcp-apps`**: **`apps/web`**
-   - Repo root is a parent folder (e.g. **`mcpUiTemplate`**): **`with-mcp-apps/apps/web`**
-5. **`apps/web/vercel.json`** sets **Install Command** to **`cd ../.. && pnpm install --frozen-lockfile`** (install from the **pnpm workspace root**). Leave **Build Command** and **Output Directory** on the defaults (**`next build`**, **`.next`**).
+   - If repo root is **`with-mcp-apps`**: set to **`apps/web`**
+   - If repo root is a parent folder: set to **`with-mcp-apps/apps/web`**
+5. **`apps/web/vercel.json`** sets **Install Command** to **`cd ../.. && pnpm install --frozen-lockfile`**. Leave **Build Command** and **Output Directory** on defaults.
 
 ---
 
 ## Step 3 — Set environment variables
 
-In the Vercel project → **Settings → Environment Variables**, add at least:
+In the Vercel project → **Settings → Environment Variables**:
 
-| Name | Value | Required | Notes |
-|------|-------|----------|-------|
-| `OPENAI_API_KEY` | `sk-proj-...` | **Yes** | Agent / Mastra |
-| `OPENAI_MODEL` | e.g. `gpt-5.2`, `gpt-4.1`, `gpt-4o` | No | Defaults to **`gpt-5.2`** if unset — tune cost/quality per deployment |
-| `E2B_API_KEY` | `e2b_...` | If using E2B | [e2b.dev/dashboard](https://e2b.dev/dashboard) — sandbox provisioning |
-| `E2B_TEMPLATE` | `templateId` string | **Recommended** | From **`apps/mcp-use-server`** `build.dev.ts` / `build.prod.ts` output (`BuildInfo.templateId`). Fast cold start (~5s) |
-| `E2B_REPO_URL` | URL | No | Fallback clone when **`E2B_TEMPLATE`** is empty. Code default: **`https://github.com/vivek100/mcp-use-server-template`** |
-
-**Optional — default MCP servers (hosted)**
+### Required
 
 | Name | Value | Notes |
 |------|-------|-------|
-| `DEFAULT_MCP_SERVERS` | JSON array | API fallback when no header |
-| `NEXT_PUBLIC_DEFAULT_MCP_SERVERS` | JSON array | Initial sidebar list. Use **`[]`** for empty |
+| `OPENAI_API_KEY` | `sk-proj-...` | **Required** — Agent / Mastra |
 
-**Optional — header & chat (no secrets)**
+### Highly Recommended (E2B)
 
-| Name | Notes |
-|------|--------|
-| `NEXT_PUBLIC_HEADER_*` | Docs URL, labels, secondary CTA |
-| `NEXT_PUBLIC_GITHUB_REPO_URL` | Alias for secondary URL |
-| `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` | JSON starter chips |
+| Name | Value | Notes |
+|------|-------|-------|
+| `E2B_API_KEY` | `e2b_...` | From [e2b.dev/dashboard](https://e2b.dev/dashboard) — enables sandbox provisioning |
+| `E2B_TEMPLATE` | `templateId` string | **Strongly recommended** — pre-built template for fast cold start (~5s vs ~60-90s). See [Creating an E2B Template](#creating-an-e2b-template) below |
 
-**Optional — debugging**
+### Optional
 
-| Name | Notes |
-|------|--------|
-| `MASTRA_AGENT_DEBUG` | Set to **`1`** for verbose **`/api/mastra-agent`** logs (per-request MCP load, etc.) |
-
-There is no widely available **public Three.js MCP** HTTP endpoint; use your own URL or registries such as [mcp.pizza](https://www.mcp.pizza).
+| Name | Value | Notes |
+|------|-------|-------|
+| `OPENAI_MODEL` | e.g. `gpt-5.2`, `gpt-4.1`, `gpt-4o` | Defaults to **`gpt-5.2`** |
+| `E2B_REPO_URL` | URL | Fallback clone when **`E2B_TEMPLATE`** is empty (slower). Default: `mcp-use-server-template` repo |
+| `DEFAULT_MCP_SERVERS` | JSON array | API fallback when no header. Default: Excalidraw |
+| `NEXT_PUBLIC_DEFAULT_MCP_SERVERS` | JSON array | Initial sidebar list. Default: Excalidraw |
+| `NEXT_PUBLIC_HEADER_*` | Various | Docs URL, labels, secondary CTA |
+| `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` | JSON | Custom starter chips |
+| `MASTRA_AGENT_DEBUG` | `1` | Verbose agent logs |
 
 > **Tip:** Vercel bulk import: paste **`KEY=value`** lines.
 
@@ -79,12 +89,10 @@ There is no widely available **public Three.js MCP** HTTP endpoint; use your own
 
 Click **Deploy**. Vercel will:
 
-1. **`pnpm install --frozen-lockfile`** at the monorepo root (via **`vercel.json`**)
-2. **`next build`** in **`apps/web`**, which runs **`prebuild`** first:
-   - **`node scripts/pack-download-kit.mjs`** → **`apps/web/.download-kit/base.tar.gz`** (monorepo shell for **full app kit** download; gitignored locally but traced into the serverless bundle via **`next.config.ts`** **`outputFileTracingIncludes`**)
-   - then **`next build`**
+1. **`pnpm install --frozen-lockfile`** at the monorepo root
+2. **`next build`** in **`apps/web`** (runs **`prebuild`** first to create the download kit)
 
-First deploy often takes **~2–3 minutes**.
+First deploy takes **~2–3 minutes**.
 
 ---
 
@@ -93,39 +101,58 @@ First deploy often takes **~2–3 minutes**.
 Open the deployment URL:
 
 - MCP App builder layout (sidebar + chat), branded header
-- Chat welcome + starter chips (**three** bounded defaults, or **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`**)
+- Chat welcome + starter chips (defaults: tic tac toe, tip calculator, dice roller, Excalidraw test)
 
-**E2B flow**
+**E2B flow:**
 
 1. Send a message that triggers **`provision_workspace`**
-2. Sidebar **Setting up…** then **Running** (faster with **`E2B_TEMPLATE`**)
+2. Sidebar shows **Setting up…** then **Running** (faster with **`E2B_TEMPLATE`**)
 3. **`refresh_mcp_tools`** → tools appear in the sidebar
 
-**Download**
+**Download:**
 
-- With **`prebuild`** succeeding on Vercel, **full kit** download should return **`mcp-app-kit-*.tar.gz`**; if the base tarball is missing or merge fails, the API falls back to **MCP-only** **`workspace-*.tar.gz`**.
+- Full kit download returns **`mcp-app-kit-*.tar.gz`** (merged monorepo + workspace)
+- If base tarball missing, falls back to **MCP-only** **`workspace-*.tar.gz`**
 
 ---
 
-## Monorepo note
+## Creating an E2B Template
 
-**`pnpm-lock.yaml`** must be committed at the workspace root so **`--frozen-lockfile`** works.
+Using a pre-built E2B template dramatically improves cold start time (**~5s** vs **60-90s** without).
 
-If **Root Directory** is **`with-mcp-apps/apps/web`**, **`vercel.json`** still **`cd ../..`** to reach the monorepo root — ensure that path is correct for your repo layout.
+### Prerequisites
+
+- **`E2B_API_KEY`** in **`.env`** at the monorepo root
+
+### Build commands
+
+| Goal | Command |
+|------|---------|
+| **Dev** snapshot | `cd apps/mcp-use-server && npx tsx --env-file=../../.env build.dev.ts` |
+| **Prod** snapshot | `cd apps/mcp-use-server && npx tsx --env-file=../../.env build.prod.ts` |
+
+Both commands output a **`templateId`** in the console log. Copy this value and set **`E2B_TEMPLATE=<templateId>`** in Vercel.
+
+> **Note:** The template **name** (alias like `mcp-use-server`) is not the same as **`templateId`**. Use the ID.
+
+**When to rebuild:**
+- After changing **`apps/mcp-use-server/package.json`**
+- After modifying tools or widgets in the template
+- After updating start commands in **`template.ts`**
+
+First build takes **~2–3 minutes**; subsequent builds are faster with layer cache.
 
 ---
 
 ## Timeouts (Vercel)
 
-These routes set **`export const maxDuration = 300`** (5 minutes) where needed:
+**`apps/web/vercel.json`** sets **`maxDuration: 60`** for agent routes:
 
-- **`/api/mastra-agent`**
-- **`/api/copilotkit`**
-- **`/api/workspace/provision`**
-- **`/api/workspace/download`**
-- **`/api/mcp-introspect`**
+- `/api/mastra-agent`
+- `/api/copilotkit`
+- `/api/workspace/download`
 
-**Hobby** plans cap serverless duration below 300s — use **Pro** (or adjust limits in the Vercel dashboard) if long downloads or agent runs time out.
+**Hobby** plans cap at **10s** — use **Pro** if agent runs or downloads time out.
 
 ---
 
@@ -139,28 +166,11 @@ Vercel → **Domains** → add DNS per instructions.
 
 | Symptom | Fix |
 |---------|-----|
-| Build fails: cannot resolve **`@/...`** | Root Directory must be **`apps/web`** (or **`…/with-mcp-apps/apps/web`**) |
-| **`E2B_API_KEY`** missing at runtime | Set for **Production** (and Preview if needed) in Vercel |
+| Build fails: cannot resolve **`@/...`** | Root Directory must be **`apps/web`** |
+| **`E2B_API_KEY`** missing at runtime | Set for **Production** in Vercel env vars |
 | Sandbox provision **500** | E2B quota / billing; check dashboard |
-| Provision **60–90s** | **`E2B_TEMPLATE`** empty or wrong — rebuild template and set **`templateId`** |
+| Provision takes **60–90s** | **`E2B_TEMPLATE`** empty or wrong — rebuild template |
 | Tools missing after provision | Rebuild E2B template after changing **`apps/mcp-use-server`** |
-| Full kit download is MCP-only only | Confirm **`next build`** ran **`prebuild`**; check build logs for **`pack-download-kit`**; see **`docs/HANDOFF.md`** (full kit behavior) |
-| Many **`POST /api/mastra-agent`** on first load (historical) | Fixed in app by a **single** **`CopilotChat`** mount (**`app/page.tsx`**); if you forked old layout, avoid duplicating chat across hidden + visible branches |
-| CORS from E2B MCP URL | E2B sandboxes are generally CORS-open for MCP; if you proxy, align origins |
-
----
-
-## E2B template: scripts and when to rebuild
-
-The template is defined in **`apps/mcp-use-server/template.ts`**. Rebuild when you change **`package.json`**, tools, widgets, or start commands there.
-
-**Prerequisite:** **`E2B_API_KEY`** in **`.env`** at the monorepo root (or exported in the shell).
-
-| Goal | Command | Output |
-|------|---------|--------|
-| **Dev** snapshot (iterate often) | `cd apps/mcp-use-server && npx tsx --env-file=../../.env build.dev.ts` | Publishes template name **`mcp-use-server-dev`**; copy **`templateId`** from the log |
-| **Prod** snapshot | `cd apps/mcp-use-server && npx tsx --env-file=../../.env build.prod.ts` | Same as dev for env: monorepo **`.env`** at repo root; publishes template name **`mcp-use-server`**; copy **`templateId`** from the log |
-
-Set **`E2B_TEMPLATE=<templateId>`** locally and in Vercel. The **template name** (alias) is **not** the same as **`templateId`**.
-
-First build often **~2–3 minutes**; later builds may be faster with layer cache.
+| Full kit download is MCP-only | Confirm **`prebuild`** ran; check build logs for **`pack-download-kit`** |
+| CORS from E2B MCP URL | E2B sandboxes are generally CORS-open; if you proxy, align origins |
+| `ECONNRESET` / timeout errors | Increase function timeout (Pro plan) or use faster model |

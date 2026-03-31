@@ -16,6 +16,7 @@ import { useMcpIntrospect, type ServerIntrospection } from "./hooks/useMcpIntros
 import { useToolConfigStore, type MergedToolConfig } from "./hooks/useToolConfigStore";
 import {
   getHeaderDocsUrl,
+  getHeaderLogoUrl,
   getHeaderPrimaryCtaLabel,
   getHeaderSecondaryCtaUrl,
 } from "./constants/branding";
@@ -92,6 +93,7 @@ function GitHubIcon({ className }: { className?: string }) {
 
 function TopBar() {
   const docsUrl = getHeaderDocsUrl();
+  const logoUrl = getHeaderLogoUrl();
   const primaryLabel = getHeaderPrimaryCtaLabel();
   const secondaryUrl = getHeaderSecondaryCtaUrl();
 
@@ -105,11 +107,11 @@ function TopBar() {
         <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
           <span className="shrink-0 text-[10px] font-medium text-slate-500 sm:text-xs">Powered by</span>
           <a
-            href={docsUrl}
+            href={logoUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex min-w-0 shrink rounded-md outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-400"
-            aria-label="CopilotKit — open documentation"
+            aria-label="CopilotKit — open GitHub repository"
           >
             <Image
               src={copilotKitLogo}

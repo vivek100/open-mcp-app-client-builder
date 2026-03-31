@@ -1,15 +1,25 @@
 const DEFAULT_DOCS_URL = "https://docs.copilotkit.ai/";
+const DEFAULT_LOGO_URL = "https://github.com/CopilotKit/CopilotKit";
 /** Demo repo (vivek100); override via `NEXT_PUBLIC_HEADER_SECONDARY_CTA_URL` or `NEXT_PUBLIC_GITHUB_REPO_URL`. */
 const DEFAULT_SECONDARY_URL = "https://github.com/vivek100/open-mcp-app-client-builder";
 const DEFAULT_SECONDARY_LABEL = "GitHub";
 
-/** Header / logo primary link — CopilotKit docs by default. */
+/** Header docs pill link — CopilotKit docs. */
 export function getHeaderDocsUrl(): string {
   const fromEnv =
     typeof process.env.NEXT_PUBLIC_HEADER_DOCS_URL === "string"
       ? process.env.NEXT_PUBLIC_HEADER_DOCS_URL.trim()
       : "";
   return fromEnv || DEFAULT_DOCS_URL;
+}
+
+/** Header logo link — CopilotKit GitHub repo. */
+export function getHeaderLogoUrl(): string {
+  const fromEnv =
+    typeof process.env.NEXT_PUBLIC_HEADER_LOGO_URL === "string"
+      ? process.env.NEXT_PUBLIC_HEADER_LOGO_URL.trim()
+      : "";
+  return fromEnv || DEFAULT_LOGO_URL;
 }
 
 /** Second header pill (e.g. repo, demo). */
