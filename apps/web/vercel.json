@@ -1,4 +1,15 @@
 {
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "functions": {
+    "app/api/mastra-agent/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/copilotkit/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/workspace/download/route.ts": {
+      "maxDuration": 60
+    }
+  }
 }
