@@ -134,7 +134,6 @@ async function executeProxiedMcpRequest(
         // 2. Strip <base> tag — blocked by CSP base-uri 'self' and unnecessary
         //    when JS/CSS are inlined (--inline build) and images use __mcpPublicUrl
         // 3. Rewrite remaining internal origin refs to the external endpoint origin
-        // 4. Inject permissive CSP meta tag so external widgets (Excalidraw etc.) can load CDN scripts/styles
         const serverOrigin = new URL(serverConfig.url).origin;
         if (Array.isArray(result.contents)) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,26 +144,11 @@ async function executeProxiedMcpRequest(
               if (baseTagMatch) {
                 try {
                   const internalOrigin = new URL(baseTagMatch[1]).origin;
-                  // Strip <base> tag (violates CSP base-uri 'self')
                   html = html.replace(/<base\b[^>]*>/gi, "");
-                  // Rewrite all remaining internal origin references
                   if (internalOrigin !== serverOrigin) {
                     html = html.replaceAll(internalOrigin, serverOrigin);
                   }
                 } catch { /* ignore */ }
-              }
-              // Inject permissive CSP for external MCP widgets (Excalidraw, etc.)
-              // This meta tag overrides the restrictive CSP inherited from the sandbox iframe.
-              const permissiveCsp = `<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' data: blob:; style-src * 'unsafe-inline'; img-src * data: blob:; font-src * data:; connect-src *; frame-src * blob: data:;">`;
-              if (!html.includes('http-equiv="Content-Security-Policy"')) {
-                // Insert after <head> or at start of document
-                if (html.includes("<head>")) {
-                  html = html.replace("<head>", `<head>${permissiveCsp}`);
-                } else if (html.includes("<head ")) {
-                  html = html.replace(/<head\s[^>]*>/, (match: string) => `${match}${permissiveCsp}`);
-                } else {
-                  html = permissiveCsp + html;
-                }
               }
               return { ...c, text: html };
             }
