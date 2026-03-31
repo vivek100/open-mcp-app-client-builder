@@ -116,6 +116,59 @@ Open the deployment URL:
 
 ---
 
+## Step 6 — Pre-go-live feature checklist
+
+Run these on your **Production** (or final Preview) URL before you share the app widely. Use a normal browser profile (no stale cache), and keep **dev tools → Console** open for CSP / network errors while testing widgets.
+
+### Shell, branding, and layout
+
+- [ ] **Page loads** without a blank screen or repeated error toasts.
+- [ ] **Header:** title **MCP App builder**, **Powered by** logo opens [CopilotKit on GitHub](https://github.com/CopilotKit/CopilotKit), **CopilotKit docs** pill opens [docs](https://docs.copilotkit.ai/), secondary icon matches your **`NEXT_PUBLIC_GITHUB_REPO_URL`** / **`NEXT_PUBLIC_HEADER_SECONDARY_CTA_URL`** if you customized them.
+- [ ] **Mobile (narrow viewport):** **Chat** and **Tools** tabs both work; tool detail opens in a **modal** (not a broken third column).
+- [ ] **Desktop:** sidebar + chat column layout; composer does not hide the latest messages.
+
+### Chat and starter prompts
+
+- [ ] **Welcome** and **starter chips** appear (default four: Tic tac toe, Tip calculator, Dice roller, Try Excalidraw — or your **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** JSON).
+- [ ] **Send a short free-form message** — assistant replies and streaming completes without **`ECONNRESET`** / timeout (may require **Vercel Pro** + sufficient **`maxDuration`** for long runs).
+- [ ] **Use at least one starter** end-to-end (see **Agent + E2B** below).
+
+### MCP servers (sidebar)
+
+- [ ] **Default server(s)** appear (built-in **Excalidraw** at `https://mcp.excalidraw.com` unless you overrode **`DEFAULT_MCP_SERVERS`** / **`NEXT_PUBLIC_DEFAULT_MCP_SERVERS`**).
+- [ ] **Add a server** — valid HTTP MCP URL + optional `serverId`; list updates and **`x-mcp-servers`** behavior matches expectations on refresh.
+- [ ] **Remove a server** — it disappears from the list and does not break the UI.
+- [ ] **Introspection errors** — if you use a bad URL, the UI shows a clear state; **Reconnect** (if shown) recovers after fixing the URL.
+
+### Agent + E2B sandbox (full product path)
+
+- [ ] **Provision workspace** — e.g. starter **Tic tac toe** or an explicit message that triggers workspace setup; sidebar shows **Setting up…** then **Running** (much faster with **`E2B_TEMPLATE`** set).
+- [ ] **Tool list** — after the agent runs **`refresh_mcp_tools`**, sandbox tools appear in the sidebar and can be opened for **detail + preview**.
+- [ ] **Built widget** — agent-created UI renders in the MCP Apps area (iframe) without endless CSP violations for normal **esm.sh** / template assets; user can interact (e.g. tic tac toe moves).
+
+### Excalidraw MCP (default CDN / CSP path)
+
+- [ ] **Try Excalidraw** starter (or equivalent): diagram tool loads styles/scripts from allowed hosts **without** blocked **style-src** / **script-src** / **font-src** errors in the console (CopilotKit **1.54+** + server **`_meta.ui.csp`** where applicable).
+- [ ] **Tool result** is visible or actionable (e.g. diagram opens as expected).
+
+### Post-provision UX (tools + downloads)
+
+- [ ] **`show_mcp_test_prompts`** — after provision / tool changes, **clickable test chips** appear in chat when the agent emits them; chips **append messages** and drive quick server tests.
+- [ ] **`restart_server` flow** — after server restart in chat, **Download full app kit** (or equivalent) works from the tool UI **or** from the **sidebar download** on the running workspace row.
+- [ ] **Download artifact** — filename **`mcp-app-kit-*.tar.gz`** when full-kit merge succeeds; verify archive opens locally. If you only get **`workspace-*.tar.gz`**, confirm **`prebuild`** / **`pack-download-kit`** ran on the deployed build (see [Troubleshooting](#troubleshooting)).
+
+### Production-only checks
+
+- [ ] **HTTPS** and correct **hostname** (custom domain if configured).
+- [ ] **Secrets** — Production env has **`OPENAI_API_KEY`**, **`E2B_*`** as needed; no secrets in client bundles (only **`NEXT_PUBLIC_*`** is exposed).
+- [ ] Optional: **`MASTRA_AGENT_DEBUG=1`** on a **Preview** deploy only — not required for final Production unless you need verbose server logs.
+
+### Automated tests (optional, from clone)
+
+From **`apps/web`** with `.env` configured, you can run **`pnpm run test:download-kit`** / **`pnpm run test:e2b-download`** (see root **README** scripts) against your stack — useful for CI or pre-release smoke, not a substitute for manual UI checks above.
+
+---
+
 ## Creating an E2B Template
 
 Using a pre-built E2B template dramatically improves cold start time (**~5s** vs **60-90s** without).
