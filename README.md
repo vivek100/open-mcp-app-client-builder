@@ -94,7 +94,7 @@ Mastra can reuse the same `messageId` for tool-call parents and text events; Cop
 
 ## Dynamic MCP UI (sidebar)
 
-- **MCP servers:** add/remove by URL (+ optional `serverId`); list is sent as **`x-mcp-servers`**. Default when local: **Three.js** at `http://localhost:3108/mcp` (from **`apps/web/app/constants/mcpServers.ts`**).
+- **MCP servers:** add/remove by URL (+ optional `serverId`); list is sent as **`x-mcp-servers`**. Built-in default: **Excalidraw** (`https://mcp.excalidraw.com`). Override via **`NEXT_PUBLIC_DEFAULT_MCP_SERVERS`** / **`DEFAULT_MCP_SERVERS`**.
 - **Tools:** compact list; open a tool for **detail + preview** in a **modal** (not a third mobile tab).
 - **Chat:** CopilotKit v2 chat with suggestions.
 
@@ -121,7 +121,7 @@ More: **[`docs/DYNAMIC_MCP.md`](docs/DYNAMIC_MCP.md)**.
 3. Env vars: at least **`OPENAI_API_KEY`**; for sandboxes add **`E2B_API_KEY`** + **`E2B_TEMPLATE`**. Optional MCP defaults and branding: see **[`docs/DEPLOY.md`](docs/DEPLOY.md)**.
 4. Deploy. **`apps/web/vercel.json`** runs **`pnpm install --frozen-lockfile`** from the monorepo root.
 
-Hosted demos typically use **`NEXT_PUBLIC_DEFAULT_MCP_SERVERS`** / **`DEFAULT_MCP_SERVERS`** or sidebar **BYO** URLs — there is no universal public Three.js MCP URL.
+Built-in default MCP is **Excalidraw** (`https://mcp.excalidraw.com`). Override via **`NEXT_PUBLIC_DEFAULT_MCP_SERVERS`** / **`DEFAULT_MCP_SERVERS`** or add servers in the sidebar.
 
 ### Agent tool pattern (sidebar preview)
 

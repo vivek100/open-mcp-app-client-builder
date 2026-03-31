@@ -24,7 +24,7 @@ Configure at least **Production** (and Preview/Development if you use them).
 
 ### Optional product / hosted MCP
 
-- [ ] **Default MCP list** — `NEXT_PUBLIC_DEFAULT_MCP_SERVERS` and/or `DEFAULT_MCP_SERVERS` (`[]` vs hosted URL)
+- [x] **Default MCP list** — Built-in default: Excalidraw (`https://mcp.excalidraw.com`). Override via env if needed.
 
 ### Branding & copy (public env)
 

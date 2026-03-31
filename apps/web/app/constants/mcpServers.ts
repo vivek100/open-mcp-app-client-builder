@@ -21,4 +21,9 @@ function getDefaultServersFromEnv(): McpServerEntry[] | null {
 
 const envDefaults = getDefaultServersFromEnv();
 
-export const DEFAULT_SERVERS: McpServerEntry[] = envDefaults ?? [];
+/** Built-in default: Excalidraw MCP server (public, no auth). Override with NEXT_PUBLIC_DEFAULT_MCP_SERVERS. */
+const BUILTIN_DEFAULTS: McpServerEntry[] = [
+  { endpoint: "https://mcp.excalidraw.com", serverId: "excalidraw" },
+];
+
+export const DEFAULT_SERVERS: McpServerEntry[] = envDefaults ?? BUILTIN_DEFAULTS;

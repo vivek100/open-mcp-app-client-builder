@@ -50,7 +50,7 @@ Stakeholder-facing summary of **what shipped**, **follow-up questions** (especia
 
 - [ ] **GitHub / secondary CTA** — Header defaults to **`https://github.com/vivek100/open-mcp-app-client-builder`**. Should the public demo point to a **CopilotKit** org repo, stay here, or another URL? (Overridable via env.)
 
-- [ ] **Default MCP for hosted demos** — Provide or recommend a **default MCP URL** for sidebar/API fallback vs **empty / BYO**? Align `NEXT_PUBLIC_DEFAULT_MCP_SERVERS`, `DEFAULT_MCP_SERVERS`, README, `DEPLOY.md`.
+- [x] **Default MCP for hosted demos** — Built-in default is **Excalidraw** (`https://mcp.excalidraw.com`, serverId `excalidraw`). Override via `NEXT_PUBLIC_DEFAULT_MCP_SERVERS` / `DEFAULT_MCP_SERVERS`.
 
 - [ ] **Chat starter prompts** — Defaults are three bounded demos: **tic tac toe**, **tip calculator**, **dice roller** (see `apps/web/app/constants/chatStarters.ts`). OK for public demo as-is, or replace via **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** (**title** + **message** each)?
 

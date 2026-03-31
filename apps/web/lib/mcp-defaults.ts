@@ -9,18 +9,24 @@ export type McpServerConfig = {
   serverId?: string;
 };
 
+/** Built-in default: Excalidraw MCP server (public, no auth). Override with DEFAULT_MCP_SERVERS env. */
+const BUILTIN_DEFAULTS: McpServerConfig[] = [
+  { type: "http", url: "https://mcp.excalidraw.com", serverId: "excalidraw" },
+];
+
 function parseDefaultMcpServers(): McpServerConfig[] {
   const raw = process.env.DEFAULT_MCP_SERVERS;
-  if (raw == null || raw === "") return [];
+  if (raw == null || raw === "") return BUILTIN_DEFAULTS;
   try {
     const parsed = JSON.parse(raw) as McpServerConfig[];
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
+    if (!Array.isArray(parsed)) return BUILTIN_DEFAULTS;
+    const filtered = parsed.filter(
       (s): s is McpServerConfig =>
         s != null && typeof s.url === "string" && (s.type === "http" || s.type === "sse")
     );
+    return filtered.length > 0 ? filtered : BUILTIN_DEFAULTS;
   } catch {
-    return [];
+    return BUILTIN_DEFAULTS;
   }
 }
 
