@@ -20,13 +20,18 @@ import { getDefaultMcpServers, type McpServerConfig } from "@/lib/mcp-defaults";
 // Allow up to 5 minutes for long agent loops
 export const maxDuration = 300;
 
+const mastraVerbose = process.env.MASTRA_AGENT_DEBUG === "1";
+function mastraLog(...args: unknown[]) {
+  if (mastraVerbose) console.log(...args);
+}
+
 function readMcpServersFromHeader(req: NextRequest): McpServerConfig[] {
   try {
     const raw = req.headers.get("x-mcp-servers");
     if (raw == null) return getDefaultMcpServers();
     const parsed = JSON.parse(raw) as McpServerConfig[];
     if (!Array.isArray(parsed)) return getDefaultMcpServers();
-    console.log("[mastra-agent] MCP servers from header:", parsed.map((s) => s.url));
+    mastraLog("[mastra-agent] MCP servers from header:", parsed.map((s) => s.url));
     return parsed;
   } catch {
     console.warn("[mastra-agent] Failed to parse x-mcp-servers header, using defaults");
@@ -88,7 +93,7 @@ async function fetchUIToolMetadata(servers: McpServerConfig[]): Promise<Map<stri
     }
   }
 
-  console.log("[mastra-agent] UI tools found:", [...uiTools.keys()]);
+  mastraLog("[mastra-agent] UI tools found:", [...uiTools.keys()]);
   return uiTools;
 }
 
@@ -332,7 +337,7 @@ function createMcpUIMiddleware(
                 structuredContent: rawResult,
               };
 
-              console.log(`[mastra-agent] Emitting ACTIVITY_SNAPSHOT for: ${toolName}`);
+              mastraLog(`[mastra-agent] Emitting ACTIVITY_SNAPSHOT for: ${toolName}`);
               subscriber.next({
                 type: "ACTIVITY_SNAPSHOT",
                 messageId: crypto.randomUUID(),
@@ -395,7 +400,7 @@ const workspaceTools: Record<string, unknown> = {
             { cwd: WS, timeoutMs: 10000 }
           );
           await sandbox.commands.run("npm run dev > /tmp/dev.log 2>&1", { cwd: WS, timeoutMs: 5000, background: true });
-          console.log("[provision_workspace] Cleaned up default template tool + restarted server");
+          mastraLog("[provision_workspace] Cleaned up default template tool + restarted server");
         }
       } catch (cleanupErr) {
         console.warn("[provision_workspace] Template cleanup warning:", cleanupErr);
@@ -666,7 +671,7 @@ export const POST = async (req: NextRequest) => {
 
   try {
     const mcpServers = readMcpServersFromHeader(req);
-    console.log("[mastra-agent] === NEW REQUEST ===", requestId);
+    mastraLog("[mastra-agent] === NEW REQUEST ===", requestId);
 
     // 1. Fetch UI tool metadata (which tools have UI + their resource URIs)
     const uiTools = await fetchUIToolMetadata(mcpServers);
@@ -686,7 +691,7 @@ export const POST = async (req: NextRequest) => {
     let mcpTools = {};
     try {
       mcpTools = await mcp.listTools();
-      console.log("[mastra-agent] MCP tools loaded:", Object.keys(mcpTools));
+      mastraLog("[mastra-agent] MCP tools loaded:", Object.keys(mcpTools));
     } catch (error) {
       console.error("[mastra-agent] Failed to load MCP tools:", error);
     }
@@ -738,7 +743,7 @@ export const POST = async (req: NextRequest) => {
       return cloned;
     };
 
-    console.log("[mastra-agent] Agent ready. UI tools:", uiTools.size, "MCP tools:", Object.keys(mcpTools).length);
+    mastraLog("[mastra-agent] Agent ready. UI tools:", uiTools.size, "MCP tools:", Object.keys(mcpTools).length);
 
     // 6. CopilotKit runtime
     const serviceAdapter = new ExperimentalEmptyAdapter();

@@ -180,6 +180,16 @@ function StudioView({
   /** Tool open in the detail modal (sidebar list stays compact). */
   const [detailTool, setDetailTool] = useState<MergedToolConfig | null>(null);
 
+  /** Matches globals.css @media (min-width: 768px) — avoids mounting two CopilotChat trees. */
+  const [mdUp, setMdUp] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const apply = () => setMdUp(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
   // On mount: restore the last workspace from localStorage so the user doesn't
   // have to re-provision a new E2B sandbox on every page reload.
   useEffect(() => {
@@ -344,37 +354,42 @@ function StudioView({
       onWorkspaceChange={setActiveWorkspace}
     >
       {/*
-        Single mount: chatPanel is rendered twice (mobile + desktop layouts) but only one is visible.
-        Registering suggestions in each instance duplicated chips in CopilotKit.
+        Single CopilotChat: only the active layout branch mounts chat (mobile XOR desktop).
+        Previously both branches stayed in the DOM; CSS hid mobile on desktop but React still
+        mounted two CopilotChat instances → duplicate POST /api/mastra-agent traffic.
       */}
       <ChatSuggestions />
-      {/* Mobile (<768px): 2-tab switcher */}
+      {/* Mobile (<768px): 2-tab switcher — skip inner tree on desktop so chat is not mounted twice */}
       <div className="mobile-layout flex h-full min-h-0 flex-col gap-2">
-        <nav className="glass-panel shrink-0 rounded-2xl p-1">
-          <div className="grid grid-cols-2 gap-1">
-            {(["chat", "tools"] as const).map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setMobileTab(key)}
-                className={`rounded-xl px-2 py-1.5 text-[11px] font-medium capitalize transition ${
-                  mobileTab === key
-                    ? "bg-slate-900 text-white shadow-sm"
-                    : "bg-white/70 text-slate-600 hover:bg-white hover:text-slate-900"
-                }`}
-              >
-                {key === "tools" ? "Tools" : "Chat"}
-              </button>
-            ))}
-          </div>
-        </nav>
+        {!mdUp && (
+          <>
+            <nav className="glass-panel shrink-0 rounded-2xl p-1">
+              <div className="grid grid-cols-2 gap-1">
+                {(["chat", "tools"] as const).map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setMobileTab(key)}
+                    className={`rounded-xl px-2 py-1.5 text-[11px] font-medium capitalize transition ${
+                      mobileTab === key
+                        ? "bg-slate-900 text-white shadow-sm"
+                        : "bg-white/70 text-slate-600 hover:bg-white hover:text-slate-900"
+                    }`}
+                  >
+                    {key === "tools" ? "Tools" : "Chat"}
+                  </button>
+                ))}
+              </div>
+            </nav>
 
-        {mobileTab === "chat" ? (
-          chatPanel
-        ) : (
-          <aside className="glass-panel flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto rounded-2xl p-2.5">
-            {sidebarContent}
-          </aside>
+            {mobileTab === "chat" ? (
+              chatPanel
+            ) : (
+              <aside className="glass-panel flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto rounded-2xl p-2.5">
+                {sidebarContent}
+              </aside>
+            )}
+          </>
         )}
       </div>
 
@@ -383,10 +398,14 @@ function StudioView({
         className="desktop-layout h-full gap-3"
         style={{ display: "grid", gridTemplateColumns: "340px minmax(0,1fr)" }}
       >
-        <aside className="glass-panel flex min-h-0 flex-col gap-3 overflow-hidden rounded-2xl p-3">
-          {sidebarContent}
-        </aside>
-        {chatPanel}
+        {mdUp && (
+          <>
+            <aside className="glass-panel flex min-h-0 flex-col gap-3 overflow-hidden rounded-2xl p-3">
+              {sidebarContent}
+            </aside>
+            {chatPanel}
+          </>
+        )}
       </div>
     </BuilderAgentProvider>
     </>

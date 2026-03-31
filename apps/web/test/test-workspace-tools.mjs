@@ -1,6 +1,6 @@
 /**
  * Workspace Tools Integration Test
- * Run: node test-workspace-tools.mjs
+ * Run: node test/test-workspace-tools.mjs
  *
  * Exercises every agent action backed by E2BWorkspaceProvider:
  *  provision    → git clone + npm install + npm run dev
@@ -18,7 +18,7 @@ import { Sandbox } from "e2b";
 import { readFileSync } from "fs";
 
 // ── env ─────────────────────────────────────────────────────────────────────
-const envText = readFileSync("../../.env", "utf-8");
+const envText = readFileSync("../../../.env", "utf-8");
 const env = Object.fromEntries(
   envText
     .split("\n")

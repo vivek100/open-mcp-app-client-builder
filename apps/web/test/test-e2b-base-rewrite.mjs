@@ -5,14 +5,14 @@
  * that /api/mcp-introspect correctly rewrites ALL localhost:3109
  * references in the widget HTML to the external E2B origin.
  *
- * Run: node test-e2b-base-rewrite.mjs
+ * Run: node test/test-e2b-base-rewrite.mjs
  */
 
 import { Sandbox } from "e2b";
 import { readFileSync } from "fs";
 
 // ── Load env ────────────────────────────────────────────────────────────────
-const envText = readFileSync("../../.env", "utf-8");
+const envText = readFileSync("../../../.env", "utf-8");
 const env = Object.fromEntries(
   envText
     .split("\n")

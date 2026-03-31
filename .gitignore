@@ -53,3 +53,6 @@ bun.lockb
 
 # LangGraph API
 .langgraph_api
+
+# Generated at apps/web build (prebuild) for full-kit workspace download
+apps/web/.download-kit/

@@ -162,7 +162,7 @@ export function McpServerManager({
               const res = await fetch("/api/workspace/download", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ workspaceId: wid, stream: true }),
+                body: JSON.stringify({ workspaceId: wid, stream: true, fullKit: true }),
               });
               if (!res.ok) {
                 const body = (await res.json().catch(() => ({}))) as { error?: string };
@@ -171,7 +171,10 @@ export function McpServerManager({
               }
               const blob = await res.blob();
               const safeId = wid.replace(/[^\w-]/g, "").slice(0, 16) || "workspace";
-              triggerBlobDownload(blob, `workspace-${safeId}.tar.gz`);
+              const cd = res.headers.get("Content-Disposition");
+              const m = cd?.match(/filename="([^"]+)"/);
+              const filename = m?.[1] ?? `workspace-${safeId}.tar.gz`;
+              triggerBlobDownload(blob, filename);
             } catch (e) {
               setDownloadError(e instanceof Error ? e.message : "Download failed");
             } finally {
@@ -249,7 +252,7 @@ export function McpServerManager({
                     disabled={downloading}
                     className="rounded-lg p-1.5 text-slate-400 hover:bg-emerald-100 hover:text-emerald-700 disabled:opacity-50"
                     aria-label="Download workspace"
-                    title="Download workspace (.tar.gz)"
+                    title="Download full app kit (.tar.gz) — monorepo + your MCP server, or MCP-only if base kit missing"
                   >
                     {downloading ? (
                       <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">

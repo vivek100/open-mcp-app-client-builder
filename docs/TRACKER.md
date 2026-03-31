@@ -24,9 +24,17 @@
 - [x] **Hosted / reliability — download on Vercel**  
   Workspace download as **`.tar.gz`**, **stream + blob** same-origin (no `zip` / pop-up issues).
 
+- [x] **Full app kit download**  
+  `apps/web` **prebuild** runs `scripts/pack-download-kit.mjs`, producing **`.download-kit/base.tar.gz`** (monorepo shell: root `package.json` / `pnpm-workspace.yaml` / `apps/web` / `apps/mcp-use-server` template / `apps/threejs-server`, excluding `node_modules`, `.next`, `dist`, etc.). **`POST /api/workspace/download`** with `stream: true` and **`fullKit: true`** (default) merges the E2B **`workspace/`** tree into **`mcp-apps-starter/apps/mcp-use-server`** and streams **`mcp-app-kit-{id}.tar.gz`**. If the base tarball is missing (e.g. dev without `prebuild`) or merge fails, response falls back to **MCP-only** `workspace-{id}.tar.gz`. **Refresh the base kit** whenever the monorepo layout or starter content changes (redeploy / rebuild web). **`next.config.ts`** uses **`outputFileTracingIncludes`** so Vercel bundles **`.download-kit/base.tar.gz`**. **`turbo.json`** lists **`.download-kit/**`** as a build output for cache correctness.
+
+- [x] **Manual integration tests (`apps/web/test/`)**  
+  Ad-hoc scripts run from **`apps/web`** as **`node test/<name>.mjs`**. **`pnpm run test:download-kit`** starts **`next dev`** (port **31099** by default; set **`TEST_SERVER_PORT`** or **`--port=`**), ensures **`base.tar.gz`**, provisions an E2B sandbox, calls **`POST /api/workspace/download`** for **fullKit** and **MCP-only**, and verifies tarball contents. With **`--no-server`**, point **`WEB_BASE`** at an already-running app (default **`http://localhost:3000`**).
+
 **Additional fixes (not on the original checklist):**
 
 - [x] **Mastra stream ↔ duplicate React keys** — Message id remapping in `apps/web/app/api/mastra-agent/route.ts` (RCA in README).
+
+- [x] **Duplicate `POST /api/mastra-agent` on load** — Mobile + desktop layout branches both stayed in the React tree; CSS hid mobile on ≥768px but **`CopilotChat` mounted twice**, doubling CopilotKit runtime traffic. **`app/page.tsx` `StudioView`** now mounts chat/sidebar only inside the active breakpoint (`matchMedia` 768px). Optional verbose agent logs: **`MASTRA_AGENT_DEBUG=1`** (see `.env.example`).
 
 ---
 
@@ -60,7 +68,7 @@ Use **Vercel → Project → Settings → Environment Variables** (at least **Pr
 - [ ] Home loads; logo + header links match intended URLs
 - [ ] Chat sends and agent responds (`OPENAI_API_KEY` valid)
 - [ ] If E2B enabled: provision completes; tools appear after refresh
-- [ ] Download workspace (`.tar.gz`) works for a running sandbox
+- [ ] Download workspace (`.tar.gz`) works for a running sandbox; optional **full kit** filename `mcp-app-kit-*.tar.gz` when merge succeeds
 
 ### Review before sign-off
 

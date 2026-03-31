@@ -1,7 +1,7 @@
 /**
  * Diagnostic #3: Verify the FULL origin rewrite fix via mcp-introspect.
  * Run AFTER restarting the Next.js dev server.
- * Run: node test-base-tag3.mjs
+ * Run: node test/test-base-tag3.mjs
  */
 
 const WEB_BASE = "http://localhost:3000";

@@ -18,7 +18,7 @@ function DownloadServerCodeLink({ workspaceId }: { workspaceId: string }) {
       const res = await fetch("/api/workspace/download", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId, stream: true }),
+        body: JSON.stringify({ workspaceId, stream: true, fullKit: true }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
@@ -26,7 +26,10 @@ function DownloadServerCodeLink({ workspaceId }: { workspaceId: string }) {
       }
       const blob = await res.blob();
       const safeId = workspaceId.replace(/[^\w-]/g, "").slice(0, 16) || "workspace";
-      triggerBlobDownload(blob, `workspace-${safeId}.tar.gz`);
+      const cd = res.headers.get("Content-Disposition");
+      const m = cd?.match(/filename="([^"]+)"/);
+      const filename = m?.[1] ?? `workspace-${safeId}.tar.gz`;
+      triggerBlobDownload(blob, filename);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Download failed");
     } finally {
@@ -37,7 +40,7 @@ function DownloadServerCodeLink({ workspaceId }: { workspaceId: string }) {
   return (
     <div className="px-3.5 py-3 border-t border-slate-200/70">
       <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-        MCP server code
+        Local starter kit
       </p>
       <button
         type="button"
@@ -55,7 +58,7 @@ function DownloadServerCodeLink({ workspaceId }: { workspaceId: string }) {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Download MCP server code
+            Download full app kit
           </>
         )}
       </button>

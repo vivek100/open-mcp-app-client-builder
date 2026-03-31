@@ -2,13 +2,13 @@
  * Test: Find a restart command that works in E2B.
  * Tries multiple approaches and reports which ones succeed.
  *
- * Run: node test-restart2.mjs
+ * Run: node test/test-restart2.mjs
  */
 
 import { Sandbox } from "e2b";
 import { readFileSync } from "fs";
 
-const envText = readFileSync("../../.env", "utf-8");
+const envText = readFileSync("../../../.env", "utf-8");
 const env = Object.fromEntries(
   envText
     .split("\n")

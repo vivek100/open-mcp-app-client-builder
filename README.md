@@ -63,6 +63,8 @@ The following scripts can also be run using your preferred package manager:
 - `start` - Starts the production server
 - `lint` - Runs ESLint for code linting
 
+**`apps/web` manual tests** (from `apps/web`): integration scripts live in **`apps/web/test/`** (for example **`pnpm run test:download-kit`** to exercise full-kit download end-to-end; **`pnpm run test:e2b-download`** for E2B-only tarball smoke). Run any script with **`node test/<file>.mjs`**.
+
 ## Agent and UI
 
 The web app is titled **MCP App builder** (subtitle **Powered by CopilotKit**), shows the CopilotKit logo from `apps/web/app/image.png`, and uses the Mastra-based agent only (`/api/mastra-agent`). Header links and labels are configurable via `NEXT_PUBLIC_HEADER_*` (docs URL, primary/secondary labels, secondary URL — or `NEXT_PUBLIC_GITHUB_REPO_URL` for the second link; code default for GitHub is **this demo repo**). Chat starter chips use **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** (JSON) if set; otherwise **two** built-in examples (tic tac toe, flow charts) — third prompt **TBD**, see **`docs/TRACKER.md`**. The original CopilotKit route remains at `apps/web/app/api/copilotkit/route.ts` for reference.
@@ -71,7 +73,7 @@ The web app is titled **MCP App builder** (subtitle **Powered by CopilotKit**), 
 
 **Post-provision test chips:** The agent can call the frontend action **`show_mcp_test_prompts`** (see `McpTestPromptsAction.tsx`) with a JSON string of `{ label, message }[]` so users get clickable chips that **`appendMessage`** into the same thread (per system prompt in `mastra-agent/route.ts`).
 
-- **restart_server tool**: When the agent runs `restart_server`, the chat UI supports downloading the current workspace (MCP server code) as **`.tar.gz`** (hosted-friendly blob download).
+- **restart_server tool**: When the agent runs `restart_server`, the chat UI supports downloading a **full app kit** as **`.tar.gz`**: the server merges the E2B workspace into a prebuilt monorepo shell (`mcp-apps-starter/`) when `apps/web/.download-kit/base.tar.gz` exists (created by **`pnpm build`** / **`prebuild`** in `apps/web`). If that file is absent, the download is **MCP server only** (same as before). See **`docs/TRACKER.md`** for details.
 
 ### Duplicate React keys (Mastra agent) — RCA and fix
 

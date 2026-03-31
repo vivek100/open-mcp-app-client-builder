@@ -1,6 +1,6 @@
 /**
  * Diagnostic #2: Dump raw widget HTML from MCP server to see actual URLs
- * Run: node test-base-tag2.mjs
+ * Run: node test/test-base-tag2.mjs
  */
 
 async function main() {

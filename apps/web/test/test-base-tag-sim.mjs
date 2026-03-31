@@ -1,7 +1,7 @@
 /**
  * Simulate the origin rewrite logic with real HTML from the MCP server.
  * Proves the fix works for the E2B case (different internal vs external origin).
- * Run: node test-base-tag-sim.mjs
+ * Run: node test/test-base-tag-sim.mjs
  */
 
 // 1. Fetch raw HTML from the local MCP server

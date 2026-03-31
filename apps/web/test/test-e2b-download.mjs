@@ -2,9 +2,9 @@
  * E2B download flow smoke test (matches apps/web/lib/workspace/e2b.ts prepareDownload)
  *
  * Run from apps/web:
- *   node test-e2b-download.mjs
+ *   node test/test-e2b-download.mjs
  *
- * Requires ../../.env with E2B_API_KEY and E2B_TEMPLATE (recommended).
+ * Requires ../../../.env (repo root) with E2B_API_KEY and E2B_TEMPLATE (recommended).
  */
 
 import { Sandbox } from "e2b";
@@ -13,7 +13,7 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const envPath = join(__dirname, "..", "..", ".env");
+const envPath = join(__dirname, "..", "..", "..", ".env");
 
 const envText = readFileSync(envPath, "utf-8");
 const env = Object.fromEntries(
@@ -31,7 +31,7 @@ const TEMPLATE_ID = env.E2B_TEMPLATE?.trim() || undefined;
 const WORKSPACE_PATH = "/home/user/workspace";
 
 if (!process.env.E2B_API_KEY) {
-  console.error("Missing E2B_API_KEY in ../../.env");
+  console.error("Missing E2B_API_KEY in repo root .env");
   process.exit(1);
 }
 

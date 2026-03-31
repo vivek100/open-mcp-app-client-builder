@@ -8,14 +8,14 @@
  * 6. Restart using the EXACT command from the prompt
  * 7. Verify new tool appears, old tool gone
  *
- * Run: node test-restart.mjs
+ * Run: node test/test-restart.mjs
  */
 
 import { Sandbox } from "e2b";
 import { readFileSync } from "fs";
 
 // ── Load env vars ────────────────────────────────────────────────────────
-const envText = readFileSync("../../.env", "utf-8");
+const envText = readFileSync("../../../.env", "utf-8");
 const env = Object.fromEntries(
   envText
     .split("\n")

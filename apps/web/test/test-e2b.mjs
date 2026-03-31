@@ -1,6 +1,6 @@
 /**
  * E2B + MCP Workspace Integration Test
- * Run: node test-e2b.mjs
+ * Run: node test/test-e2b.mjs
  *
  * Tests:
  *  1. E2B API key + sandbox creation
@@ -14,7 +14,7 @@ import { Sandbox } from "e2b";
 import { readFileSync } from "fs";
 
 // ── Load env vars from .env ────────────────────────────────────────────────
-const envText = readFileSync("../../.env", "utf-8");
+const envText = readFileSync("../../../.env", "utf-8");
 const env = Object.fromEntries(
   envText
     .split("\n")

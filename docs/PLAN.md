@@ -344,8 +344,8 @@ Agent:
 - [x] `E2B_REPO_URL` + `E2B_TEMPLATE` set in `.env`
 
 **Tests passing:**
-- [x] `test-e2b.mjs` — 14/14 (basic E2B operations)
-- [x] `test-workspace-tools.mjs` — 19/19 (full agent tool flow: provision → write → edit → exec → restart → introspect → download)
+- [x] `apps/web/test/test-e2b.mjs` — 14/14 (basic E2B operations)
+- [x] `apps/web/test/test-workspace-tools.mjs` — 19/19 (full agent tool flow: provision → write → edit → exec → restart → introspect → download)
 - [x] TypeScript: `tsc --noEmit` clean
 
 #### Known technical decisions
@@ -454,8 +454,8 @@ with-mcp-apps/
           types.ts                # WorkspaceProvider interface
           e2b.ts                  # E2BWorkspaceProvider
           index.ts                # getProvider() factory
-      test-e2b.mjs               # E2B basic ops test (14/14)
-      test-workspace-tools.mjs   # Full agent tool flow test (19/19)
+      node test/test-e2b.mjs               # E2B basic ops test (14/14)
+      node test/test-workspace-tools.mjs   # Full agent tool flow test (19/19)
     threejs-server/               # reference server (manual registration)
     mcp-use-server/               # mcp-use library server
                                   # also published as standalone GitHub repo:

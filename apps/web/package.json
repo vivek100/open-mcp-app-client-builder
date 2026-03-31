@@ -5,9 +5,13 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "dev:mcp": "cd src/threejs-server && pnpm run dev",
+    "pack-download-kit": "node ./scripts/pack-download-kit.mjs",
+    "prebuild": "node ./scripts/pack-download-kit.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:download-kit": "node ./test/test-download-full-kit.mjs",
+    "test:e2b-download": "node ./test/test-e2b-download.mjs"
   },
   "dependencies": {
     "@ag-ui/client": "^0.0.45",
@@ -28,6 +32,7 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "rxjs": "^7.8.1",
+    "tar": "^7.5.4",
     "zod": "^3.23.0"
   },
   "devDependencies": {

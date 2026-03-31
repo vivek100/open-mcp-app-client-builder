@@ -7,6 +7,10 @@ dotenv.config({
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["@copilotkit/runtime"],
+  /** Bundle prebuilt monorepo shell for full-kit workspace download (see prebuild / pack-download-kit). */
+  outputFileTracingIncludes: {
+    "/api/workspace/download": [".download-kit/base.tar.gz"],
+  },
 };
 
 export default nextConfig;

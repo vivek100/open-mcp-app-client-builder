@@ -1,12 +1,12 @@
 /**
  * Final test: Exact sequence from the updated prompt (v3).
- * Run: node test-restart-final.mjs
+ * Run: node test/test-restart-final.mjs
  */
 
 import { Sandbox } from "e2b";
 import { readFileSync } from "fs";
 
-const envText = readFileSync("../../.env", "utf-8");
+const envText = readFileSync("../../../.env", "utf-8");
 const env = Object.fromEntries(
   envText
     .split("\n")

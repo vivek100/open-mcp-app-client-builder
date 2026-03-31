@@ -6,7 +6,7 @@
  * 2. Direct MCP connection — reads raw HTML before our fix
  * 3. Compares raw vs fixed <base> tags
  *
- * Run: node test-base-tag.mjs
+ * Run: node test/test-base-tag.mjs
  */
 
 const WEB_BASE = "http://localhost:3000";

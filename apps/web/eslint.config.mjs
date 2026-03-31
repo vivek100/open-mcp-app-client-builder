@@ -12,6 +12,7 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
       "agent",
+      "test/**/*.mjs",
     ],
   },
 ];

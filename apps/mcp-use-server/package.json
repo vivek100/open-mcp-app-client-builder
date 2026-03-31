@@ -25,7 +25,7 @@
     "dev": "mcp-use build --inline && cross-env NODE_ENV=production npx tsx index.ts",
     "start": "mcp-use start",
     "deploy": "mcp-use deploy",
-    "postinstall": "mcp-use generate-types || true"
+    "postinstall": "mcp-use generate-types || node -e \"process.exit(0)\""
   },
   "dependencies": {
     "@openai/apps-sdk-ui": "^0.2.1",
