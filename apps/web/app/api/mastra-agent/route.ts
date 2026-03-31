@@ -583,6 +583,12 @@ RULES:
 2. Do NOT call read_file to "study" the template. All patterns are below.
 3. Keep messages to 1 sentence max. Batch tool calls when possible.
 
+REQUEST SHAPE (reliability):
+- Prefer ONE tool + ONE widget: single screen, local state, vanilla React + template CSS in /home/user/workspace.
+- Do NOT add npm dependencies or heavy client libraries unless the user clearly requires them and you can justify a minimal add—default is no new packages.
+- Avoid flowcharts, node graphs, infinite canvases, or diagram editors (React Flow, Mermaid, D3, graphviz, etc.) unless the user insists; those blow scope in the sandbox. Offer a simpler bounded widget instead (game board, calculator, list + form).
+- If the ask is vague, ask one short clarifying question instead of guessing a large architecture.
+
 ═══════════════════════════════════════════════════════════════
 PATTERNS (use directly — do NOT read_file)
 ═══════════════════════════════════════════════════════════════
@@ -657,6 +663,9 @@ const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+/** OpenAI chat model for the Mastra agent (`@ai-sdk/openai` id), e.g. gpt-5.2, gpt-4.1, gpt-4o. */
+const OPENAI_MODEL = process.env.OPENAI_MODEL?.trim() || "gpt-5.2";
+
 // ── Request handler ──────────────────────────────────────────────────────────
 // Architecture:
 // - Mastra Agent executes MCP tools directly (via MCPClient — the LLM can see them)
@@ -671,7 +680,7 @@ export const POST = async (req: NextRequest) => {
 
   try {
     const mcpServers = readMcpServersFromHeader(req);
-    mastraLog("[mastra-agent] === NEW REQUEST ===", requestId);
+    mastraLog("[mastra-agent] === NEW REQUEST ===", requestId, "model:", OPENAI_MODEL);
 
     // 1. Fetch UI tool metadata (which tools have UI + their resource URIs)
     const uiTools = await fetchUIToolMetadata(mcpServers);
@@ -709,7 +718,7 @@ export const POST = async (req: NextRequest) => {
           },
         },
       },
-      model: openai("gpt-5.2"),
+      model: openai(OPENAI_MODEL),
       tools: {
         ...mcpTools,
         ...workspaceTools,

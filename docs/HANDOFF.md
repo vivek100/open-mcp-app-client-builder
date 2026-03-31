@@ -52,10 +52,10 @@ Stakeholder-facing summary of **what shipped**, **follow-up questions** (especia
 
 - [ ] **Default MCP for hosted demos** — Provide or recommend a **default MCP URL** for sidebar/API fallback vs **empty / BYO**? Align `NEXT_PUBLIC_DEFAULT_MCP_SERVERS`, `DEFAULT_MCP_SERVERS`, README, `DEPLOY.md`.
 
-- [ ] **Three chat starter prompts** — Two built-in (**tic tac toe**, **flow charts**); **third TBD**. Full set of three for the public demo (**title** + **message** each)?
+- [ ] **Chat starter prompts** — Defaults are three bounded demos: **tic tac toe**, **tip calculator**, **dice roller** (see `apps/web/app/constants/chatStarters.ts`). OK for public demo as-is, or replace via **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** (**title** + **message** each)?
 
 - [ ] **CopilotKit v2** — `CopilotChat` (v2) + `useCopilotChatSuggestions` — any best-practice or deprecation adjustments?
 
 ---
 
-_Last updated: split from go-live checklist; GitHub default = vivek100 demo repo; two starters + third TBD._
+_Last updated: split from go-live checklist; GitHub default = vivek100 demo repo; three built-in chat starters (bounded UI demos)._

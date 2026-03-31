@@ -3,10 +3,19 @@ export type ChatStarterPrompt = {
   message: string;
 };
 
-/** Two agreed starters; add a third via `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` when product decides. */
+/** Three bounded UI demos; override entirely via `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` if needed. */
 const DEFAULT_PROMPTS: ChatStarterPrompt[] = [
   { title: "Tic tac toe", message: "Create a tic tac toe game" },
-  { title: "Flow charts", message: "Create an app that creates flow charts" },
+  {
+    title: "Tip calculator",
+    message:
+      "Create a single-widget tip calculator: bill amount, tip % presets, split between people, and show tip + total per person. Use only React and the existing template CSS—no new npm packages.",
+  },
+  {
+    title: "Dice roller",
+    message:
+      "Create a dice roller widget: choose number of dice (1–6) and sides (e.g. 4, 6, 8, 10, 12, 20), roll button, and show each die result plus the sum. Use only React and the existing template—no chart or diagram libraries.",
+  },
 ];
 
 /**

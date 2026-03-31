@@ -43,6 +43,7 @@ In the Vercel project → **Settings → Environment Variables**, add at least:
 | Name | Value | Required | Notes |
 |------|-------|----------|-------|
 | `OPENAI_API_KEY` | `sk-proj-...` | **Yes** | Agent / Mastra |
+| `OPENAI_MODEL` | e.g. `gpt-5.2`, `gpt-4.1`, `gpt-4o` | No | Defaults to **`gpt-5.2`** if unset — tune cost/quality per deployment |
 | `E2B_API_KEY` | `e2b_...` | If using E2B | [e2b.dev/dashboard](https://e2b.dev/dashboard) — sandbox provisioning |
 | `E2B_TEMPLATE` | `templateId` string | **Recommended** | From **`apps/mcp-use-server`** `build.dev.ts` / `build.prod.ts` output (`BuildInfo.templateId`). Fast cold start (~5s) |
 | `E2B_REPO_URL` | URL | No | Fallback clone when **`E2B_TEMPLATE`** is empty. Code default: **`https://github.com/vivek100/mcp-use-server-template`** |
@@ -92,7 +93,7 @@ First deploy often takes **~2–3 minutes**.
 Open the deployment URL:
 
 - MCP App builder layout (sidebar + chat), branded header
-- Chat welcome + starter chips (**two** defaults, or **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`**)
+- Chat welcome + starter chips (**three** bounded defaults, or **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`**)
 
 **E2B flow**
 

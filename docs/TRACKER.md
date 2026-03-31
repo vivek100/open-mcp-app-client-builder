@@ -12,7 +12,7 @@ Configure at least **Production** (and Preview/Development if you use them).
 
 ### Secrets and API keys
 
-- [ ] **OpenAI** — `OPENAI_API_KEY` (required for `/api/mastra-agent` and chat)
+- [ ] **OpenAI** — `OPENAI_API_KEY` (required for `/api/mastra-agent` and chat); optional **`OPENAI_MODEL`** (default `gpt-5.2`)
 - [ ] **E2B** — `E2B_API_KEY` if **provision workspace / sandbox** must work in production
 - [ ] **E2B template** — `E2B_TEMPLATE` (**`templateId`** from `build.dev.ts` / `build.prod.ts`; recommended for ~5s cold start — see `DEPLOY.md`)
 - [ ] **E2B repo** — `E2B_REPO_URL` only if the default clone URL should be overridden
@@ -29,7 +29,7 @@ Configure at least **Production** (and Preview/Development if you use them).
 ### Branding & copy (public env)
 
 - [ ] **Header** — `NEXT_PUBLIC_HEADER_*` / `NEXT_PUBLIC_GITHUB_REPO_URL` if defaults are wrong for this deployment
-- [ ] **Chat starters** — `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` when the final three prompts are decided (see `HANDOFF.md`)
+- [ ] **Chat starters** — Defaults ship as three bounded demos; set `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` only if you want custom chips (see `HANDOFF.md`)
 
 ---
 

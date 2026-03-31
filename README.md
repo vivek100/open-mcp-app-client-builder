@@ -10,7 +10,7 @@ https://github.com/user-attachments/assets/8908af31-2b64-4426-9c83-c51ab86256de
 
 - Node.js 20+
 - [pnpm](https://pnpm.io/installation) (required for the workspace; Vercel uses **`pnpm install --frozen-lockfile`**)
-- OpenAI API key (`OPENAI_API_KEY`)
+- OpenAI API key (`OPENAI_API_KEY`); optional **`OPENAI_MODEL`** for `/api/mastra-agent` (default **`gpt-5.2`**)
 
 > **Lockfile:** **`pnpm-lock.yaml` is committed** and should stay in version control so installs are reproducible and Vercel can use `--frozen-lockfile`. This repo’s `.gitignore` only excludes `package-lock.json`, `yarn.lock`, and `bun.lockb` — not pnpm’s lockfile.
 
@@ -78,7 +78,7 @@ See **Hosting on Vercel** below and **[`docs/DEPLOY.md`](docs/DEPLOY.md)** for d
 
 ## Agent and UI
 
-The app title is **MCP App builder** (subtitle **Powered by CopilotKit**), logo **`apps/web/app/image.png`**, agent route **`/api/mastra-agent`**. Header CTAs use **`NEXT_PUBLIC_HEADER_*`** (and **`NEXT_PUBLIC_GITHUB_REPO_URL`** for the secondary link; code default points at **this demo repo**). Chat starters: **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** (JSON) or **two** built-in prompts — third **TBD** (**[`docs/HANDOFF.md`](docs/HANDOFF.md)**). Reference CopilotKit route: **`apps/web/app/api/copilotkit/route.ts`**.
+The app title is **MCP App builder** (subtitle **Powered by CopilotKit**), logo **`apps/web/app/image.png`**, agent route **`/api/mastra-agent`**. Header CTAs use **`NEXT_PUBLIC_HEADER_*`** (and **`NEXT_PUBLIC_GITHUB_REPO_URL`** for the secondary link; code default points at **this demo repo**). Chat starters: **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** (JSON) or **three** built-in bounded demos — tic tac toe, tip calculator, dice roller (**[`docs/HANDOFF.md`](docs/HANDOFF.md)**). Reference CopilotKit route: **`apps/web/app/api/copilotkit/route.ts`**.
 
 **Starter prompts** use **`useCopilotChatSuggestions`** (`ChatSuggestions.tsx`) with v2 **`CopilotChat`**.
 

@@ -6,7 +6,7 @@ import { getChatStarterPrompts } from "../constants/chatStarters";
 
 /**
  * Registers starter prompts with CopilotKit v2 so CopilotChat renders suggestion pills.
- * Configure with `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` (JSON) — see `.env.example`. Defaults: two prompts; third TBD (see `docs/HANDOFF.md`).
+ * Configure with `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` (JSON) — see `.env.example`. Defaults: three bounded demos (tic tac toe, tip calculator, dice roller).
  */
 export function ChatSuggestions() {
   const suggestions = useMemo(() => getChatStarterPrompts(), []);
