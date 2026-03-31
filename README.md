@@ -1,177 +1,154 @@
 # CopilotKit <> MCP Apps Starter
 
-**Primary handoff document (share with CopilotKit / stakeholders): [`docs/TRACKER.md`](docs/TRACKER.md)** — fixes shipped, production checklist, env defaults, and review asks.
+**Production go-live:** [`docs/TRACKER.md`](docs/TRACKER.md) · **Stakeholder / product handoff** (shipped scope, CopilotKit open questions): [`docs/HANDOFF.md`](docs/HANDOFF.md)
 
-This repository demonstrates how to integrate MCP Apps with CopilotKit. It uses the [Three.js example](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/threejs-server) from the official Model Context Protocol organization on GitHub.
-
+This monorepo demonstrates **MCP Apps** with **CopilotKit**: the **MCP App builder** web UI (`apps/web`) drives a **Mastra** agent (`/api/mastra-agent`) that can provision **E2B** sandboxes running the **`mcp-use-server`** template (`apps/mcp-use-server`). An optional local sample is the [Three.js MCP example](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/threejs-server) in **`apps/threejs-server`** (used for sidebar defaults when running everything locally).
 
 https://github.com/user-attachments/assets/8908af31-2b64-4426-9c83-c51ab86256de
 
-
 ## Prerequisites
 
-- Node.js 20+ 
-- [pnpm](https://pnpm.io/installation) (recommended)
-- OpenAI API Key
+- Node.js 20+
+- [pnpm](https://pnpm.io/installation) (required for the workspace; Vercel uses **`pnpm install --frozen-lockfile`**)
+- OpenAI API key (`OPENAI_API_KEY`)
 
-> **Note:** This repository ignores lock files (package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb) to avoid conflicts between different package managers. Each developer should generate their own lock file using their preferred package manager. After that, make sure to delete it from the .gitignore.
+> **Lockfile:** **`pnpm-lock.yaml` is committed** and should stay in version control so installs are reproducible and Vercel can use `--frozen-lockfile`. This repo’s `.gitignore` only excludes `package-lock.json`, `yarn.lock`, and `bun.lockb` — not pnpm’s lockfile.
 
-## Getting Started
+## Getting started
 
-1. Install dependencies:
-```bash
-pnpm i
-```
+From the **repository root** (`with-mcp-apps`):
 
-2. Set up environment variables (see `.env.example` for all options):
 ```powershell
-# Copy example and edit with your values
-Copy-Item .env.example .env
-# Minimum: set OPENAI_API_KEY=sk-proj-... in .env
-```
-
-3. Start the MCP Apps server (or use `pnpm dev` from the repo root to start both web and MCP server):
-```bash
-# From repo root, start both web app and Three.js MCP server:
-pnpm dev
-
-# Or run only the Three.js MCP server (e.g. from apps/threejs-server):
-cd apps/threejs-server
 pnpm i
+Copy-Item .env.example .env
+# Edit .env: set OPENAI_API_KEY=sk-proj-... at minimum; add E2B_* for sandbox provisioning (see below)
 pnpm dev
 ```
 
-4. Start the development server:
-```bash
-# Using pnpm
-pnpm dev
+**`pnpm dev`** runs **Turbo** and starts workspace **`dev`** tasks (the Next.js app and other configured apps — see root `package.json` / `turbo.json`).
 
-# Using npm
-npm run dev
+**Run pieces individually**
 
-# Using yarn
-yarn dev
+| Goal | Command |
+|------|---------|
+| Web app only | `pnpm --filter web dev` (from repo root) or `cd apps/web && pnpm dev` |
+| Three.js MCP sample (local sidebar default) | `cd apps/threejs-server && pnpm dev` |
+| `mcp-use-server` (local MCP, not the E2B image) | `cd apps/mcp-use-server && pnpm dev` |
 
-# Using bun
-bun run dev
-```
+Open the URL shown by Next (usually `http://localhost:3000`).
 
-## Available Scripts
-The following scripts can also be run using your preferred package manager:
-- `dev` - Starts both UI and agent servers in development mode
-- `build` - Builds the Next.js application for production
-- `start` - Starts the production server
-- `lint` - Runs ESLint for code linting
+## Scripts reference
 
-**`apps/web` manual tests** (from `apps/web`): integration scripts live in **`apps/web/test/`** (for example **`pnpm run test:download-kit`** to exercise full-kit download end-to-end; **`pnpm run test:e2b-download`** for E2B-only tarball smoke). Run any script with **`node test/<file>.mjs`**.
+### Root (`package.json`)
+
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Turbo: all packages’ `dev` scripts |
+| `pnpm build` | Turbo: all packages’ `build` (for `web`, runs **`prebuild`** first — see below) |
+| `pnpm lint` | Turbo lint |
+| `pnpm clean` / `pnpm fresh` | Remove installs / lockfile helpers (see script definitions) |
+
+### `apps/web`
+
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Next.js dev (Turbopack) |
+| `pnpm build` | Runs **`prebuild`** → **`pack-download-kit`** (writes **`.download-kit/base.tar.gz`** for [full app kit](docs/HANDOFF.md) download), then **`next build`** |
+| `pnpm pack-download-kit` | Regenerate **`.download-kit/base.tar.gz`** without a full Next build |
+| `pnpm start` | Production Next server |
+| `pnpm lint` | ESLint |
+| `pnpm run test:download-kit` | Integration test: Next + E2B + **`POST /api/workspace/download`** (see **`apps/web/test/`)** |
+| `pnpm run test:e2b-download` | Smoke test: E2B tarball only |
+| `pnpm run dev:mcp` | Starts the **Three.js** sample MCP from **`apps/threejs-server`** (for local MCP alongside web) |
+
+Manual scripts under **`apps/web/test/`**: run from **`apps/web`** as `node test/<file>.mjs` (paths and env documented in each file).
+
+### E2B sandbox template (`apps/mcp-use-server`)
+
+The agent provisions sandboxes from an E2B **template** defined in **`template.ts`**. Rebuild the image when you change dependencies, tools, or widgets there.
+
+| Script | When to use | Command (from repo root) |
+|--------|-------------|---------------------------|
+| **Dev template** (`mcp-use-server-dev`) | Day-to-day iteration | `cd apps/mcp-use-server && npx tsx --env-file=../../.env build.dev.ts` |
+| **Prod template** (`mcp-use-server`) | Stable snapshot for production | `cd apps/mcp-use-server && npx tsx --env-file=../../.env build.prod.ts` |
+
+Requirements: **`E2B_API_KEY`** in `.env` (or environment). The CLI prints a **`BuildInfo`** object; set **`E2B_TEMPLATE`** to **`templateId`** from that output (and the same in Vercel). Template **name** (e.g. `mcp-use-server-dev`) is not the same as **`templateId`**.
+
+See **Hosting on Vercel** below and **[`docs/DEPLOY.md`](docs/DEPLOY.md)** for deploy env vars and troubleshooting.
 
 ## Agent and UI
 
-The web app is titled **MCP App builder** (subtitle **Powered by CopilotKit**), shows the CopilotKit logo from `apps/web/app/image.png`, and uses the Mastra-based agent only (`/api/mastra-agent`). Header links and labels are configurable via `NEXT_PUBLIC_HEADER_*` (docs URL, primary/secondary labels, secondary URL — or `NEXT_PUBLIC_GITHUB_REPO_URL` for the second link; code default for GitHub is **this demo repo**). Chat starter chips use **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** (JSON) if set; otherwise **two** built-in examples (tic tac toe, flow charts) — third prompt **TBD**, see **`docs/TRACKER.md`**. The original CopilotKit route remains at `apps/web/app/api/copilotkit/route.ts` for reference.
+The app title is **MCP App builder** (subtitle **Powered by CopilotKit**), logo **`apps/web/app/image.png`**, agent route **`/api/mastra-agent`**. Header CTAs use **`NEXT_PUBLIC_HEADER_*`** (and **`NEXT_PUBLIC_GITHUB_REPO_URL`** for the secondary link; code default points at **this demo repo**). Chat starters: **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** (JSON) or **two** built-in prompts — third **TBD** (**[`docs/HANDOFF.md`](docs/HANDOFF.md)**). Reference CopilotKit route: **`apps/web/app/api/copilotkit/route.ts`**.
 
-**Starter prompts** in the chat are configured with CopilotKit’s `useCopilotChatSuggestions` (`apps/web/app/components/ChatSuggestions.tsx`) so v2 `CopilotChat` shows the framework’s suggestion pills instead of a separate row of buttons above the chat.
+**Starter prompts** use **`useCopilotChatSuggestions`** (`ChatSuggestions.tsx`) with v2 **`CopilotChat`**.
 
-**Post-provision test chips:** The agent can call the frontend action **`show_mcp_test_prompts`** (see `McpTestPromptsAction.tsx`) with a JSON string of `{ label, message }[]` so users get clickable chips that **`appendMessage`** into the same thread (per system prompt in `mastra-agent/route.ts`).
+**Post-provision test chips:** frontend action **`show_mcp_test_prompts`** (`McpTestPromptsAction.tsx`) — JSON string of `{ label, message }[]` for clickable chips (**`appendMessage`**).
 
-- **restart_server tool**: When the agent runs `restart_server`, the chat UI supports downloading a **full app kit** as **`.tar.gz`**: the server merges the E2B workspace into a prebuilt monorepo shell (`mcp-apps-starter/`) when `apps/web/.download-kit/base.tar.gz` exists (created by **`pnpm build`** / **`prebuild`** in `apps/web`). If that file is absent, the download is **MCP server only** (same as before). See **`docs/TRACKER.md`** for details.
+**Download:** **`restart_server`** / sidebar download can return a **full app kit** (`.tar.gz`): E2B workspace merged into **`mcp-apps-starter/`** when **`apps/web/.download-kit/base.tar.gz`** exists (created by **`pnpm build`** / **`prebuild`** in `apps/web`). Otherwise download is **MCP-only**. Details: **`docs/HANDOFF.md`**.
+
+**Debug agent traffic:** set **`MASTRA_AGENT_DEBUG=1`** in `.env` for verbose **`/api/mastra-agent`** logs (see `.env.example`).
 
 ### Duplicate React keys (Mastra agent) — RCA and fix
 
-When the Mastra agent streams responses, you may see React warnings: *"Encountered two children with the same key"* (e.g. same UUID and same UUID with `-custom-after`). **Root cause:** Mastra reuses the same `messageId` for (1) the parent of tool calls (`TOOL_CALL_START.parentMessageId`) and (2) all `TEXT_MESSAGE_*` events in the run. CopilotKit creates messages from both: from text events (id = `messageId`) and from tool-call events (id = `parentMessageId`). If a text message with id `X` is emitted first and then a tool call with `parentMessageId X` is emitted, the runtime can end up with two messages with id `X`. The UI keys messages (and custom blocks as `id-custom-after`), so duplicate ids produce duplicate key errors. **Fix (in `apps/web/app/api/mastra-agent/route.ts`):** We track every id already emitted (as `messageId` or `parentMessageId`). We remap `TEXT_MESSAGE_*` when `messageId` collides with a seen `parentMessageId`, and we remap `TOOL_CALL_START.parentMessageId` when that id was already emitted, so the stream never creates two messages with the same id.
+Mastra can reuse the same `messageId` for tool-call parents and text events; CopilotKit then collides keys. **`mastra-agent/route.ts`** remaps ids when collisions are detected — see **`docs/HANDOFF.md`** / inline comments.
 
-## Option D: Dynamic MCP UI (add servers, see tools, test)
+## Dynamic MCP UI (sidebar)
 
-The app includes a **left panel** for managing MCP servers and testing tools:
+- **MCP servers:** add/remove by URL (+ optional `serverId`); list is sent as **`x-mcp-servers`**. Default when local: **Three.js** at `http://localhost:3108/mcp` (from **`apps/web/app/constants/mcpServers.ts`**).
+- **Tools:** compact list; open a tool for **detail + preview** in a **modal** (not a third mobile tab).
+- **Chat:** CopilotKit v2 chat with suggestions.
 
-- **MCP servers**: Add or remove MCP servers by endpoint URL (and optional server ID). The list is synced to the agent via `x-mcp-servers` and persisted in memory. The default Three.js server (`http://localhost:3108/mcp`) is pre-configured. The sidebar uses minimal chrome: **+ Add** for new servers (no list-level Reset); the top bar shows branding + header CTAs.
-- **Test MCP tools**: Suggested prompts to try in the chat (e.g. "Show me a rotating cube with Three.js", "Use learn_threejs to get documentation").
+More: **[`docs/DYNAMIC_MCP.md`](docs/DYNAMIC_MCP.md)**.
 
-To use: run `pnpm dev` from the repo root, open the app, and use the left panel to add servers or follow the test suggestions in the chat.
+### Mobile layout
 
-See [docs/DYNAMIC_MCP.md](docs/DYNAMIC_MCP.md) for more on dynamic MCP options.
+- **Tabs:** **Chat** and **Tools** (servers + tool list). Tool **preview / detail** opens in a **modal**.
+- **Desktop:** sidebar + chat column (**`md+`**).
+- **Chat UX:** spacing and bottom padding so the composer does not cover the latest messages.
 
-### Mobile layout behavior
-
-The web app now has a dedicated small-screen layout:
-
-- **Chat-first on mobile**: chat is shown as the primary view by default.
-- **Panel switcher**: on smaller screens, `Chat`, `Servers & Tools`, and `Preview` are available via a top switcher menu instead of showing all columns at once.
-- **Desktop unchanged**: the full 3-column studio remains active on larger (`md+`) screens.
-- **Chat spacing fixes**: mobile message padding and scroll spacing are adjusted so the composer does not hide recent user/AI messages.
-- **Composer overlap fix**: in the studio chat, bottom scrolling now keeps the latest message visible above the input instead of being covered by it.
-- **Sticky composer buffer**: the chat list now adds an extra bottom spacer after CopilotKit's computed padding, so the newest message remains readable when fully scrolled down.
-- **Safety fallback**: if the mobile view state is ever invalid, chat is rendered by default so the screen never appears blank.
-
-## E2B Sandbox Template
-
-The agent provisions isolated MCP server sandboxes via [E2B](https://e2b.dev). To keep provisioning fast (~5s instead of 60-90s), a custom E2B template is used that has all dependencies pre-installed.
-
-### What the template includes
-
-The template is defined in [apps/mcp-use-server/template.ts](apps/mcp-use-server/template.ts) and bakes in:
-- Node.js LTS base image
-- All `node_modules` from `npm install`
-- Pre-built widget bundles from `npm run build`
-- Auto-starts the MCP server on port 3109 when the sandbox boots
-
-### Rebuilding the template
-
-Rebuild when you add/change npm packages or add new tools to the MCP server:
-
-```bash
-cd apps/mcp-use-server
-npx tsx --env-file=../../.env build.dev.ts
-```
-
-This publishes a new snapshot as `mcp-use-server-dev` and prints a template ID. Copy that ID into `E2B_TEMPLATE` in your `.env` (and Vercel environment variables if deployed).
-
-> The current template ID is stored in `.env` as `E2B_TEMPLATE`.
-
-### Environment variables required
+## Environment variables (E2B)
 
 | Variable | Description |
 |----------|-------------|
 | `E2B_API_KEY` | From [e2b.dev/dashboard](https://e2b.dev/dashboard) |
-| `E2B_TEMPLATE` | Template ID — set after running `build.dev.ts` |
-| `E2B_REPO_URL` | Fallback GitHub repo URL (used only if `E2B_TEMPLATE` is blank) |
+| `E2B_TEMPLATE` | **`templateId`** from `Template.build` output after **`build.dev.ts`** / **`build.prod.ts`** |
+| `E2B_REPO_URL` | Used when **`E2B_TEMPLATE`** is empty — clones repo into sandbox (slower cold start). Default in code: **`mcp-use-server-template`** GitHub URL |
 
-### Hosting on Vercel
+## Hosting on Vercel
 
-You can push this app to a **private** (or public) repo and deploy on [Vercel](https://vercel.com):
+1. Push this repo (or the `with-mcp-apps` folder) to GitHub/GitLab/Bitbucket.
+2. Vercel **Root Directory:** **`apps/web`** (or **`with-mcp-apps/apps/web`** if the monorepo lives one level down).
+3. Env vars: at least **`OPENAI_API_KEY`**; for sandboxes add **`E2B_API_KEY`** + **`E2B_TEMPLATE`**. Optional MCP defaults and branding: see **[`docs/DEPLOY.md`](docs/DEPLOY.md)**.
+4. Deploy. **`apps/web/vercel.json`** runs **`pnpm install --frozen-lockfile`** from the monorepo root.
 
-1. Push the `with-mcp-apps` folder to a GitHub/GitLab/Bitbucket repo.
-2. In Vercel, import the repo and set **Root Directory** to `apps/web` (or `with-mcp-apps/apps/web` if the repo root is the parent folder).
-3. In Vercel → Settings → Environment Variables, set at least **`OPENAI_API_KEY`**. Optionally set `E2B_API_KEY`, `E2B_TEMPLATE`, and `DEFAULT_MCP_SERVERS` / `NEXT_PUBLIC_DEFAULT_MCP_SERVERS` for hosted MCP servers (see [docs/DEPLOY.md](docs/DEPLOY.md)).
-4. Deploy. The MCP server list starts empty (or from `NEXT_PUBLIC_DEFAULT_MCP_SERVERS`); users can add any openly hosted MCP URL in the sidebar. There is no publicly hosted Three.js MCP endpoint widely available—you can host your own or use another MCP.
+Hosted demos typically use **`NEXT_PUBLIC_DEFAULT_MCP_SERVERS`** / **`DEFAULT_MCP_SERVERS`** or sidebar **BYO** URLs — there is no universal public Three.js MCP URL.
 
-See [docs/DEPLOY.md](docs/DEPLOY.md) for full Vercel deployment steps and troubleshooting.
+### Agent tool pattern (sidebar preview)
 
-### Agent tool pattern (MCP UI Studio preview)
-
-The coding agent (see `apps/web/app/api/copilotkit/route.ts` and `apps/web/app/api/mastra-agent/route.ts`) is instructed to create MCP tools that include **`_meta["ui/previewData"]`** for widget tools. This sample data is used by the Studio sidebar to render a demo preview before any live tool call. Example: `tools/product-search.ts` uses `_meta: { "ui/previewData": { query: "tropical", results: [...] } }`. When adding or changing the agent system prompt, keep this requirement so new tools get a proper sidebar preview.
-
----
+Widget tools should include **`_meta["ui/previewData"]`** for offline sidebar preview (example: **`apps/mcp-use-server/tools/product-search.ts`**).
 
 ## Documentation
 
-- **Dynamic MCP ("add MCP on the run")**: See [docs/DYNAMIC_MCP.md](docs/DYNAMIC_MCP.md) for how the **open-mcp-client** repo in this workspace adds/removes MCP servers at runtime (Python LangGraph agent + `useCoAgent` + MCPConfigForm), and how to bring that pattern into this app.
-- **E2B Workspaces**: See [docs/PLAN.md](docs/PLAN.md) for the overall MCP UI Studio roadmap and [docs/E2B-IMPLEMENTATION.md](docs/E2B-IMPLEMENTATION.md) for a detailed design of running MCP workspaces inside E2B sandboxes (provisioning, command execution, MCP endpoints, and download flow).
+**In this repo**
 
-The main UI component is in `apps/web/app/page.tsx`. You can:
-- Modify the theme colors and styling
-- Add new frontend actions
-- Customize the CopilotKit sidebar appearance
+- **[`docs/TRACKER.md`](docs/TRACKER.md)** — **production go-live checklist** (Vercel sign-off)  
+- **[`docs/HANDOFF.md`](docs/HANDOFF.md)** — shipped scope, CopilotKit open questions  
+- **[`docs/DEPLOY.md`](docs/DEPLOY.md)** — Vercel import, env tables, E2B rebuild, troubleshooting  
+- **[`docs/DYNAMIC_MCP.md`](docs/DYNAMIC_MCP.md)** — dynamic MCP patterns  
+- **[`docs/PLAN.md`](docs/PLAN.md)** / **[`docs/E2B-IMPLEMENTATION.md`](docs/E2B-IMPLEMENTATION.md)** — roadmap and E2B design  
 
-## 📚 Documentation
+**UI entry:** `apps/web/app/page.tsx` (theme, layout, CopilotKit wiring).
 
-- [CopilotKit Documentation](https://docs.copilotkit.ai) - Explore CopilotKit's capabilities
-- [Next.js Documentation](https://nextjs.org/docs) - Learn about Next.js features and API
-- [MCP Apps Documentation](https://mcpui.dev/guide/introduction) - Learn more about MCP Apps and how to use it
+**External**
+
+- [CopilotKit](https://docs.copilotkit.ai)  
+- [Next.js](https://nextjs.org/docs)  
+- [MCP Apps / UI](https://mcpui.dev/guide/introduction)  
 
 ## Contributing
 
-Feel free to submit issues and enhancement requests! This starter is designed to be easily extensible.
+Issues and PRs welcome.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT — see **LICENSE**.

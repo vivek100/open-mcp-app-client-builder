@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "dev:mcp": "cd src/threejs-server && pnpm run dev",
+    "dev:mcp": "cd ../threejs-server && pnpm run dev",
     "pack-download-kit": "node ./scripts/pack-download-kit.mjs",
     "prebuild": "node ./scripts/pack-download-kit.mjs",
     "build": "next build",
