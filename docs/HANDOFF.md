@@ -4,8 +4,8 @@ Stakeholder-facing summary of **what shipped**, **follow-up questions** (especia
 
 | Doc | Purpose |
 |-----|---------|
-| **[`TRACKER.md`](TRACKER.md)** | **Production go-live checklist** (Vercel env, smoke tests, sign-off) — use this to ship |
-| **[`DEPLOY.md`](DEPLOY.md)** | Step-by-step Vercel import, E2B template scripts, troubleshooting |
+| **[`TRACKER.md`](TRACKER.md)** | **Production go-live checklist** (Render env, smoke tests, sign-off) — use this to ship |
+| **[`DEPLOY.md`](DEPLOY.md)** | Step-by-step Render deploy, E2B template scripts, pre-go-live checklist, troubleshooting |
 | **[`README.md`](../README.md)** | Developer setup, scripts, architecture overview |
 
 ---

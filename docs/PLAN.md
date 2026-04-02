@@ -394,7 +394,7 @@ Agent:
 
 ### Phase 5 — Deployment ← NEXT
 
-- [ ] Deploy `apps/web` to Vercel (see `docs/DEPLOY.md` for step-by-step)
+- [ ] Deploy web app on Render (see `docs/DEPLOY.md` for step-by-step)
 - [ ] Set production env vars (`E2B_API_KEY`, `E2B_REPO_URL`, `E2B_TEMPLATE`, `OPENAI_API_KEY`)
 - [ ] Rate-limit sandbox creation (one active sandbox per user session)
 - [ ] Add CORS if the MCP endpoint will be used by external clients

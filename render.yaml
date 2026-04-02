@@ -1,0 +1,49 @@
+# Render Blueprint — MCP UI Studio (Next.js in pnpm monorepo)
+# https://render.com/docs/blueprint-spec
+#
+# After first sync: set secrets in the dashboard (OPENAI_API_KEY, E2B_API_KEY, …).
+# Do not commit real API keys.
+
+services:
+  - type: web
+    name: mcp-ui-studio
+    runtime: node
+    region: oregon # change if needed: https://render.com/docs/regions
+    # plan: free | starter | standard — set in dashboard or uncomment (free spins down after idle)
+    buildCommand: corepack enable && corepack prepare pnpm@10.13.1 --activate && pnpm install --frozen-lockfile && pnpm --filter web build
+    startCommand: pnpm --filter web start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+
+      # ── Secrets (set values in Render dashboard, not here) ──────────────────
+      - key: OPENAI_API_KEY
+        sync: false # value set in dashboard only
+      - key: E2B_API_KEY
+        sync: false
+      - key: E2B_TEMPLATE
+        sync: false # templateId from build.dev.ts / build.prod.ts
+
+      # ── Optional (uncomment and set values as needed) ───────────────────────
+      # - key: OPENAI_MODEL
+      #   value: "gpt-4.1" # default is gpt-5.2
+      # - key: E2B_REPO_URL
+      #   value: "" # fallback clone URL if E2B_TEMPLATE is empty
+      # - key: DEFAULT_MCP_SERVERS
+      #   value: "[]" # JSON array for API fallback
+      # - key: NEXT_PUBLIC_DEFAULT_MCP_SERVERS
+      #   value: "[]" # JSON array for sidebar defaults
+      # - key: NEXT_PUBLIC_CHAT_STARTER_PROMPTS
+      #   value: "[]" # JSON array of {title, message}
+      # - key: NEXT_PUBLIC_HEADER_DOCS_URL
+      #   value: "https://docs.copilotkit.ai/"
+      # - key: NEXT_PUBLIC_HEADER_LOGO_URL
+      #   value: "https://github.com/CopilotKit/CopilotKit"
+      # - key: NEXT_PUBLIC_HEADER_SECONDARY_CTA_URL
+      #   value: ""
+      # - key: NEXT_PUBLIC_GITHUB_REPO_URL
+      #   value: ""
+      # - key: MASTRA_AGENT_DEBUG
+      #   value: "1" # verbose agent logs
+
+      # See docs/DEPLOY.md for full env var reference

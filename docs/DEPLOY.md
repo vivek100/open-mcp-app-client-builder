@@ -1,10 +1,16 @@
-# Deploying MCP UI Studio to Vercel
+# Deploying MCP UI Studio on Render
+
+Production hosting uses **[Render](https://render.com)** as a **Node Web Service** (`next start`). This app is **not** a static site: it needs API routes, streaming, and SSR.
+
+**Infrastructure as code:** optional root **`render.yaml`** Blueprint defines build/start commands and env var *keys* (secrets use `sync: false` — set values in the Render dashboard).
+
+---
 
 ## Prerequisites
 
-- A [Vercel account](https://vercel.com) (free tier works; long-running API routes need **Pro** for >10s timeout)
-- The repo pushed to GitHub / GitLab / Bitbucket (can be private)
-- Environment variables ready (see below)
+- A [Render account](https://dashboard.render.com)
+- The repo on GitHub / GitLab / Bitbucket (can be private)
+- Environment variables ready (see [Step 3](#step-3--environment-variables))
 
 ---
 
@@ -12,21 +18,18 @@
 
 Before deploying a public-facing instance, you may want to remove internal documentation:
 
-1. **Delete the `docs/` folder** — contains internal planning, handoff notes, and implementation details not needed in production.
-
-2. **Update `.gitignore`** to exclude docs in future commits (if you keep a separate dev branch):
+1. **Delete the `docs/` folder** — internal planning and handoff notes.
+2. **Update `.gitignore`** to exclude docs in future commits (optional):
    ```
-   # Internal docs (remove for production)
    docs/
    ```
-
-3. **Update `README.md`** — remove references to internal docs (`docs/PLAN.md`, `docs/HANDOFF.md`, etc.) and keep only user-facing setup instructions.
+3. **Update `README.md`** — drop references to internal-only doc paths if you removed `docs/`.
 
 ---
 
-## Step 1 — Push to GitHub
+## Step 1 — Push to Git
 
-If the project is **not** yet in Git, from the monorepo root (PowerShell):
+From the monorepo root (PowerShell):
 
 ```powershell
 git init
@@ -36,182 +39,179 @@ git remote add origin https://github.com/YOUR_USER/your-repo.git
 git push -u origin main
 ```
 
-If you already have a remote and **`main`**, skip **`git init`** and push as usual.
+If you already have a remote, push as usual.
 
 ---
 
-## Step 2 — Import project on Vercel
+## Step 2 — Create the Web Service on Render
 
-1. Go to [vercel.com/new](https://vercel.com/new)
-2. Click **Import Git Repository** and select your repo
-3. Vercel will auto-detect **Next.js** — keep the defaults
-4. Set **Root Directory**:
-   - If repo root is **`with-mcp-apps`**: set to **`apps/web`**
-   - If repo root is a parent folder: set to **`with-mcp-apps/apps/web`**
-5. **`apps/web/vercel.json`** sets **Install Command** to **`cd ../.. && pnpm install --frozen-lockfile`**. Leave **Build Command** and **Output Directory** on defaults.
+1. **New → Web Service** → connect the repository.
+
+2. **Root Directory** — **critical for this monorepo**
+   - Leave **empty** if the Git repo root is **`with-mcp-apps`** (folder that contains **`pnpm-lock.yaml`**).
+   - If the Git root is a *parent* folder, set Root Directory to **`with-mcp-apps`**.
+   - **Do not** set Root Directory to **`apps/web` alone** — Render [does not ship files outside the service root](https://render.com/docs/monorepo-support#setting-a-root-directory), so the workspace lockfile and install would break.
+
+3. **Runtime:** **Node**. Set **Node 20 or 22** (e.g. env **`NODE_VERSION=22`** — see [Node version](https://render.com/docs/node-version)).
+
+4. **Build Command:**
+
+   ```bash
+   corepack enable && corepack prepare pnpm@10.13.1 --activate && pnpm install --frozen-lockfile && pnpm --filter web build
+   ```
+
+   If `corepack` fails on the image:
+
+   ```bash
+   npm install -g pnpm@10 && pnpm install --frozen-lockfile && pnpm --filter web build
+   ```
+
+5. **Start Command:**
+
+   ```bash
+   pnpm --filter web start
+   ```
+
+   Render sets **`PORT`**; **`next start`** uses it automatically.
+
+6. **Blueprint alternative:** connect **`render.yaml`** at the monorepo root ([Blueprints](https://render.com/docs/infrastructure-as-code)) — then fill secret values in the dashboard after sync.
 
 ---
 
-## Step 3 — Set environment variables
+## Step 3 — Environment variables
 
-In the Vercel project → **Settings → Environment Variables**:
+In the service → **Environment**:
 
 ### Required
 
 | Name | Value | Notes |
 |------|-------|-------|
-| `OPENAI_API_KEY` | `sk-proj-...` | **Required** — Agent / Mastra |
+| `OPENAI_API_KEY` | `sk-proj-...` | Agent / Mastra |
 
-### Highly Recommended (E2B)
+### Highly recommended (E2B)
 
 | Name | Value | Notes |
 |------|-------|-------|
-| `E2B_API_KEY` | `e2b_...` | From [e2b.dev/dashboard](https://e2b.dev/dashboard) — enables sandbox provisioning |
-| `E2B_TEMPLATE` | `templateId` string | **Strongly recommended** — pre-built template for fast cold start (~5s vs ~60-90s). See [Creating an E2B Template](#creating-an-e2b-template) below |
+| `E2B_API_KEY` | `e2b_...` | [e2b.dev/dashboard](https://e2b.dev/dashboard) |
+| `E2B_TEMPLATE` | `templateId` | Pre-built template → fast cold start (~5s vs ~60–90s). See [Creating an E2B template](#creating-an-e2b-template). |
 
 ### Optional
 
-| Name | Value | Notes |
-|------|-------|-------|
-| `OPENAI_MODEL` | e.g. `gpt-5.2`, `gpt-4.1`, `gpt-4o` | Defaults to **`gpt-5.2`** |
-| `E2B_REPO_URL` | URL | Fallback clone when **`E2B_TEMPLATE`** is empty (slower). Default: `mcp-use-server-template` repo |
-| `DEFAULT_MCP_SERVERS` | JSON array | API fallback when no header. Default: Excalidraw |
-| `NEXT_PUBLIC_DEFAULT_MCP_SERVERS` | JSON array | Initial sidebar list. Default: Excalidraw |
-| `NEXT_PUBLIC_HEADER_*` | Various | Docs URL, labels, secondary CTA |
-| `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` | JSON | Custom starter chips |
-| `MASTRA_AGENT_DEBUG` | `1` | Verbose agent logs |
+| Name | Notes |
+|------|--------|
+| `OPENAI_MODEL` | e.g. `gpt-5.2`, `gpt-4.1`, `gpt-4o` — default **`gpt-5.2`** |
+| `E2B_REPO_URL` | Fallback clone if **`E2B_TEMPLATE`** empty (slower) |
+| `DEFAULT_MCP_SERVERS` | JSON array — API fallback; default includes Excalidraw |
+| `NEXT_PUBLIC_DEFAULT_MCP_SERVERS` | JSON array — sidebar defaults |
+| `NEXT_PUBLIC_HEADER_*`, `NEXT_PUBLIC_GITHUB_REPO_URL` | Branding / header URLs |
+| `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` | JSON `[{ "title", "message" }, …]` |
+| `MASTRA_AGENT_DEBUG` | `1` — verbose **`/api/mastra-agent`** logs |
 
-> **Tip:** Vercel bulk import: paste **`KEY=value`** lines.
+**`render.yaml`** lists the same keys: secrets use **`sync: false`** so you set values only in the dashboard (never commit keys).
+
+Copy from **`.env.example`** at the monorepo root for local parity.
 
 ---
 
 ## Step 4 — Deploy
 
-Click **Deploy**. Vercel will:
+Trigger a deploy. Render runs **`pnpm install --frozen-lockfile`**, then **`pnpm --filter web build`** (which runs **`prebuild`** → **`pack-download-kit`** → **`next build`**).
 
-1. **`pnpm install --frozen-lockfile`** at the monorepo root
-2. **`next build`** in **`apps/web`** (runs **`prebuild`** first to create the download kit)
-
-First deploy takes **~2–3 minutes**.
+First deploy often takes **~2–3 minutes**.
 
 ---
 
 ## Step 5 — Verify
 
-Open the deployment URL:
+Open your Render URL:
 
-- MCP App builder layout (sidebar + chat), branded header
-- Chat welcome + starter chips (defaults: tic tac toe, tip calculator, dice roller, Excalidraw test)
+- MCP App builder (sidebar + chat), header branding
+- Starter chips: tic tac toe, tip calculator, dice roller, Try Excalidraw (unless overridden)
 
-**E2B flow:**
+**E2B:** message triggers **`provision_workspace`** → **Setting up…** → **Running** → **`refresh_mcp_tools`** → tools in sidebar.
 
-1. Send a message that triggers **`provision_workspace`**
-2. Sidebar shows **Setting up…** then **Running** (faster with **`E2B_TEMPLATE`**)
-3. **`refresh_mcp_tools`** → tools appear in the sidebar
-
-**Download:**
-
-- Full kit download returns **`mcp-app-kit-*.tar.gz`** (merged monorepo + workspace)
-- If base tarball missing, falls back to **MCP-only** **`workspace-*.tar.gz`**
+**Download:** full kit **`mcp-app-kit-*.tar.gz`** when merge succeeds; otherwise **`workspace-*.tar.gz`**.
 
 ---
 
 ## Step 6 — Pre-go-live feature checklist
 
-Run these on your **Production** (or final Preview) URL before you share the app widely. Use a normal browser profile (no stale cache), and keep **dev tools → Console** open for CSP / network errors while testing widgets.
+Run on your **production** Render URL. Keep the browser **Console** open for CSP/network issues while testing widgets.
 
-### Shell, branding, and layout
+### Shell, branding, layout
 
-- [ ] **Page loads** without a blank screen or repeated error toasts.
-- [ ] **Header:** title **MCP App builder**, **Powered by** logo opens [CopilotKit on GitHub](https://github.com/CopilotKit/CopilotKit), **CopilotKit docs** pill opens [docs](https://docs.copilotkit.ai/), secondary icon matches your **`NEXT_PUBLIC_GITHUB_REPO_URL`** / **`NEXT_PUBLIC_HEADER_SECONDARY_CTA_URL`** if you customized them.
-- [ ] **Mobile (narrow viewport):** **Chat** and **Tools** tabs both work; tool detail opens in a **modal** (not a broken third column).
-- [ ] **Desktop:** sidebar + chat column layout; composer does not hide the latest messages.
+- [ ] Page loads; no blank screen or error spam.
+- [ ] Header: **Powered by** logo → CopilotKit GitHub; **CopilotKit docs** pill → docs; secondary icon matches env if customized.
+- [ ] **Mobile:** Chat / Tools tabs; tool detail in **modal**.
+- [ ] **Desktop:** sidebar + chat; composer does not cover the last messages.
 
-### Chat and starter prompts
+### Chat and starters
 
-- [ ] **Welcome** and **starter chips** appear (default four: Tic tac toe, Tip calculator, Dice roller, Try Excalidraw — or your **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`** JSON).
-- [ ] **Send a short free-form message** — assistant replies and streaming completes without **`ECONNRESET`** / timeout (may require **Vercel Pro** + sufficient **`maxDuration`** for long runs).
-- [ ] **Use at least one starter** end-to-end (see **Agent + E2B** below).
+- [ ] Welcome + starter chips (defaults or **`NEXT_PUBLIC_CHAT_STARTER_PROMPTS`**).
+- [ ] Free-form message streams to completion (if timeouts occur, try a faster model or check Render/plan limits).
+- [ ] At least one starter runs end-to-end with E2B.
 
-### MCP servers (sidebar)
+### MCP servers
 
-- [ ] **Default server(s)** appear (built-in **Excalidraw** at `https://mcp.excalidraw.com` unless you overrode **`DEFAULT_MCP_SERVERS`** / **`NEXT_PUBLIC_DEFAULT_MCP_SERVERS`**).
-- [ ] **Add a server** — valid HTTP MCP URL + optional `serverId`; list updates and **`x-mcp-servers`** behavior matches expectations on refresh.
-- [ ] **Remove a server** — it disappears from the list and does not break the UI.
-- [ ] **Introspection errors** — if you use a bad URL, the UI shows a clear state; **Reconnect** (if shown) recovers after fixing the URL.
+- [ ] Default **Excalidraw** (unless env overrides).
+- [ ] Add / remove server; introspection errors are clear; **Reconnect** works after fixes.
 
-### Agent + E2B sandbox (full product path)
+### Agent + E2B + widgets
 
-- [ ] **Provision workspace** — e.g. starter **Tic tac toe** or an explicit message that triggers workspace setup; sidebar shows **Setting up…** then **Running** (much faster with **`E2B_TEMPLATE`** set).
-- [ ] **Tool list** — after the agent runs **`refresh_mcp_tools`**, sandbox tools appear in the sidebar and can be opened for **detail + preview**.
-- [ ] **Built widget** — agent-created UI renders in the MCP Apps area (iframe) without endless CSP violations for normal **esm.sh** / template assets; user can interact (e.g. tic tac toe moves).
+- [ ] Provision → **Running**; tools after **`refresh_mcp_tools`**; built widget usable in iframe without endless CSP errors.
 
-### Excalidraw MCP (default CDN / CSP path)
+### Excalidraw
 
-- [ ] **Try Excalidraw** starter (or equivalent): diagram tool loads styles/scripts from allowed hosts **without** blocked **style-src** / **script-src** / **font-src** errors in the console (CopilotKit **1.54+** + server **`_meta.ui.csp`** where applicable).
-- [ ] **Tool result** is visible or actionable (e.g. diagram opens as expected).
+- [ ] **Try Excalidraw** starter: no blocked **script-src** / **style-src** / **font-src** for normal CDN loads.
 
-### Post-provision UX (tools + downloads)
+### Downloads + test chips
 
-- [ ] **`show_mcp_test_prompts`** — after provision / tool changes, **clickable test chips** appear in chat when the agent emits them; chips **append messages** and drive quick server tests.
-- [ ] **`restart_server` flow** — after server restart in chat, **Download full app kit** (or equivalent) works from the tool UI **or** from the **sidebar download** on the running workspace row.
-- [ ] **Download artifact** — filename **`mcp-app-kit-*.tar.gz`** when full-kit merge succeeds; verify archive opens locally. If you only get **`workspace-*.tar.gz`**, confirm **`prebuild`** / **`pack-download-kit`** ran on the deployed build (see [Troubleshooting](#troubleshooting)).
+- [ ] **`show_mcp_test_prompts`** chips append messages.
+- [ ] **`restart_server`** / sidebar download → **`mcp-app-kit-*.tar.gz`** when **`prebuild`** succeeded on deploy.
 
-### Production-only checks
+### Production checks
 
-- [ ] **HTTPS** and correct **hostname** (custom domain if configured).
-- [ ] **Secrets** — Production env has **`OPENAI_API_KEY`**, **`E2B_*`** as needed; no secrets in client bundles (only **`NEXT_PUBLIC_*`** is exposed).
-- [ ] Optional: **`MASTRA_AGENT_DEBUG=1`** on a **Preview** deploy only — not required for final Production unless you need verbose server logs.
+- [ ] **HTTPS** and expected hostname / custom domain.
+- [ ] Secrets only in Render env — **`NEXT_PUBLIC_*`** is client-visible.
 
-### Automated tests (optional, from clone)
+### Automated tests (optional)
 
-From **`apps/web`** with `.env` configured, you can run **`pnpm run test:download-kit`** / **`pnpm run test:e2b-download`** (see root **README** scripts) against your stack — useful for CI or pre-release smoke, not a substitute for manual UI checks above.
+From **`apps/web`** with `.env`: **`pnpm run test:download-kit`** / **`test:e2b-download`** (see README).
 
 ---
 
-## Creating an E2B Template
+## Creating an E2B template
 
-Using a pre-built E2B template dramatically improves cold start time (**~5s** vs **60-90s** without).
+Pre-built template ≈ **~5s** cold start vs **~60–90s** without.
 
-### Prerequisites
-
-- **`E2B_API_KEY`** in **`.env`** at the monorepo root
-
-### Build commands
+**Prerequisite:** **`E2B_API_KEY`** in **`.env`** at monorepo root (local) or Render env.
 
 | Goal | Command |
 |------|---------|
-| **Dev** snapshot | `cd apps/mcp-use-server && npx tsx --env-file=../../.env build.dev.ts` |
-| **Prod** snapshot | `cd apps/mcp-use-server && npx tsx --env-file=../../.env build.prod.ts` |
+| **Dev** | `cd apps/mcp-use-server && npx tsx --env-file=../../.env build.dev.ts` |
+| **Prod** | `cd apps/mcp-use-server && npx tsx --env-file=../../.env build.prod.ts` |
 
-Both commands output a **`templateId`** in the console log. Copy this value and set **`E2B_TEMPLATE=<templateId>`** in Vercel.
+Copy **`templateId`** from the build log → set **`E2B_TEMPLATE`** on Render. Template **name** ≠ **`templateId`**.
 
-> **Note:** The template **name** (alias like `mcp-use-server`) is not the same as **`templateId`**. Use the ID.
-
-**When to rebuild:**
-- After changing **`apps/mcp-use-server/package.json`**
-- After modifying tools or widgets in the template
-- After updating start commands in **`template.ts`**
-
-First build takes **~2–3 minutes**; subsequent builds are faster with layer cache.
+**Rebuild** after changes to **`apps/mcp-use-server`** `package.json`, tools, widgets, or **`template.ts`**.
 
 ---
 
-## Timeouts (Vercel)
+## Autodeploys and monorepos
 
-**`apps/web/vercel.json`** sets **`maxDuration: 60`** for agent routes:
-
-- `/api/mastra-agent`
-- `/api/copilotkit`
-- `/api/workspace/download`
-
-**Hobby** plans cap at **10s** — use **Pro** if agent runs or downloads time out.
+With root = full monorepo, every push may rebuild. Narrow triggers with Render [**build filters**](https://render.com/docs/monorepo-support#setting-build-filters), e.g. include `apps/web/**`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `package.json`.
 
 ---
 
-## Custom domain (optional)
+## Custom domain
 
-Vercel → **Domains** → add DNS per instructions.
+Render service → **Settings → Custom Domains** → follow DNS instructions.
+
+---
+
+## Notes vs Vercel (historical)
+
+**`apps/web/vercel.json`** and route **`export const maxDuration`** are for **Vercel** only; Render ignores them. On Render you run a long-lived Node process — no Vercel Hobby 10s serverless cap, but still validate long agent streams in production.
 
 ---
 
@@ -219,11 +219,19 @@ Vercel → **Domains** → add DNS per instructions.
 
 | Symptom | Fix |
 |---------|-----|
-| Build fails: cannot resolve **`@/...`** | Root Directory must be **`apps/web`** |
-| **`E2B_API_KEY`** missing at runtime | Set for **Production** in Vercel env vars |
-| Sandbox provision **500** | E2B quota / billing; check dashboard |
-| Provision takes **60–90s** | **`E2B_TEMPLATE`** empty or wrong — rebuild template |
-| Tools missing after provision | Rebuild E2B template after changing **`apps/mcp-use-server`** |
-| Full kit download is MCP-only | Confirm **`prebuild`** ran; check build logs for **`pack-download-kit`** |
-| CORS from E2B MCP URL | E2B sandboxes are generally CORS-open; if you proxy, align origins |
-| `ECONNRESET` / timeout errors | Increase function timeout (Pro plan) or use faster model |
+| Build: cannot resolve **`@/...`** or missing workspace | Service root must be **pnpm monorepo root** (with **`pnpm-lock.yaml`**), not **`apps/web`** only. |
+| **`pnpm install`** / lockfile errors | Commit **`pnpm-lock.yaml`**; use **`--frozen-lockfile`** as in **`render.yaml`**. |
+| **`E2B_API_KEY`** missing | Set in Render **Environment** for the web service. |
+| Sandbox **500** | E2B quota / billing. |
+| Provision **60–90s** | Set **`E2B_TEMPLATE`** to a valid **`templateId`**. |
+| Tools missing after provision | Rebuild E2B template after **`mcp-use-server`** changes. |
+| Full kit is MCP-only | Build logs must show **`pack-download-kit`** / **`prebuild`** success. |
+| CORS / E2B MCP | Sandboxes are usually CORS-open; align origins if you proxy. |
+| Streaming cuts off | Check Render logs, model latency, and service plan. |
+
+---
+
+## See also
+
+- **[`docs/RENDER.md`](RENDER.md)** — short Render-focused pointers (defers here for full steps).
+- **[`render.yaml`](../render.yaml)** — Blueprint template at repo root.

@@ -1,6 +1,6 @@
 # CopilotKit <> MCP Apps Starter
 
-**Production go-live:** [`docs/TRACKER.md`](docs/TRACKER.md) · **Stakeholder / product handoff** (shipped scope, CopilotKit open questions): [`docs/HANDOFF.md`](docs/HANDOFF.md)
+**Production go-live (Render):** [`docs/TRACKER.md`](docs/TRACKER.md) · **Stakeholder / product handoff** (shipped scope, CopilotKit open questions): [`docs/HANDOFF.md`](docs/HANDOFF.md)
 
 This monorepo demonstrates **MCP Apps** with **CopilotKit**: the **MCP App builder** web UI (`apps/web`) drives a **Mastra** agent (`/api/mastra-agent`) that can provision **E2B** sandboxes running the **`mcp-use-server`** template (`apps/mcp-use-server`). An optional local sample is the [Three.js MCP example](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/threejs-server) in **`apps/threejs-server`** (used for sidebar defaults when running everything locally).
 
@@ -9,10 +9,10 @@ https://github.com/user-attachments/assets/8908af31-2b64-4426-9c83-c51ab86256de
 ## Prerequisites
 
 - Node.js 20+
-- [pnpm](https://pnpm.io/installation) (required for the workspace; Vercel uses **`pnpm install --frozen-lockfile`**)
+- [pnpm](https://pnpm.io/installation) (required for the workspace; production uses **`pnpm install --frozen-lockfile`** on Render)
 - OpenAI API key (`OPENAI_API_KEY`); optional **`OPENAI_MODEL`** for `/api/mastra-agent` (default **`gpt-5.2`**)
 
-> **Lockfile:** **`pnpm-lock.yaml` is committed** and should stay in version control so installs are reproducible and Vercel can use `--frozen-lockfile`. This repo’s `.gitignore` only excludes `package-lock.json`, `yarn.lock`, and `bun.lockb` — not pnpm’s lockfile.
+> **Lockfile:** **`pnpm-lock.yaml` is committed** and should stay in version control so installs are reproducible (Render build uses **`--frozen-lockfile`**). This repo’s `.gitignore` only excludes `package-lock.json`, `yarn.lock`, and `bun.lockb` — not pnpm’s lockfile.
 
 ## Getting started
 
@@ -72,9 +72,9 @@ The agent provisions sandboxes from an E2B **template** defined in **`template.t
 | **Dev template** (`mcp-use-server-dev`) | Day-to-day iteration | `cd apps/mcp-use-server && npx tsx --env-file=../../.env build.dev.ts` |
 | **Prod template** (`mcp-use-server`) | Stable snapshot for production | `cd apps/mcp-use-server && npx tsx --env-file=../../.env build.prod.ts` |
 
-Requirements: **`E2B_API_KEY`** in `.env` (or environment). The CLI prints a **`BuildInfo`** object; set **`E2B_TEMPLATE`** to **`templateId`** from that output (and the same in Vercel). Template **name** (e.g. `mcp-use-server-dev`) is not the same as **`templateId`**.
+Requirements: **`E2B_API_KEY`** in `.env` (or environment). The CLI prints a **`BuildInfo`** object; set **`E2B_TEMPLATE`** to **`templateId`** from that output (and the same on Render). Template **name** (e.g. `mcp-use-server-dev`) is not the same as **`templateId`**.
 
-See **Hosting on Vercel** below and **[`docs/DEPLOY.md`](docs/DEPLOY.md)** for deploy env vars and troubleshooting.
+See **Hosting on Render** below and **[`docs/DEPLOY.md`](docs/DEPLOY.md)** for deploy env vars and troubleshooting.
 
 ## Agent and UI
 
@@ -114,14 +114,18 @@ More: **[`docs/DYNAMIC_MCP.md`](docs/DYNAMIC_MCP.md)**.
 | `E2B_TEMPLATE` | **`templateId`** from `Template.build` output after **`build.dev.ts`** / **`build.prod.ts`** |
 | `E2B_REPO_URL` | Used when **`E2B_TEMPLATE`** is empty — clones repo into sandbox (slower cold start). Default in code: **`mcp-use-server-template`** GitHub URL |
 
-## Hosting on Vercel
+## Hosting on Render
+
+Production deploys use **[Render](https://render.com)** as a **Node Web Service** (not a static site — API routes and streaming are required).
 
 1. Push this repo (or the `with-mcp-apps` folder) to GitHub/GitLab/Bitbucket.
-2. Vercel **Root Directory:** **`apps/web`** (or **`with-mcp-apps/apps/web`** if the monorepo lives one level down).
-3. Env vars: at least **`OPENAI_API_KEY`**; for sandboxes add **`E2B_API_KEY`** + **`E2B_TEMPLATE`**. Optional MCP defaults and branding: see **[`docs/DEPLOY.md`](docs/DEPLOY.md)**.
-4. Deploy. **`apps/web/vercel.json`** runs **`pnpm install --frozen-lockfile`** from the monorepo root.
+2. **Root Directory:** the **pnpm monorepo root** (folder containing **`pnpm-lock.yaml`**). **Do not** set root to **`apps/web`** only — see **[`docs/DEPLOY.md`](docs/DEPLOY.md)**.
+3. **Build / start:** use the commands in **`DEPLOY.md`** or sync the root **`render.yaml`** Blueprint.
+4. **Env vars:** at least **`OPENAI_API_KEY`**; for sandboxes add **`E2B_API_KEY`** + **`E2B_TEMPLATE`**. Full tables: **`DEPLOY.md`**.
 
 Built-in default MCP is **Excalidraw** (`https://mcp.excalidraw.com`). Override via **`NEXT_PUBLIC_DEFAULT_MCP_SERVERS`** / **`DEFAULT_MCP_SERVERS`** or add servers in the sidebar.
+
+**Short reference:** **[`docs/RENDER.md`](docs/RENDER.md)** · **`apps/web/vercel.json`** is only for Vercel (optional); Render ignores it.
 
 ### Agent tool pattern (sidebar preview)
 
@@ -131,9 +135,10 @@ Widget tools should include **`_meta["ui/previewData"]`** for offline sidebar pr
 
 **In this repo**
 
-- **[`docs/TRACKER.md`](docs/TRACKER.md)** — **production go-live checklist** (Vercel sign-off)  
+- **[`docs/TRACKER.md`](docs/TRACKER.md)** — **production go-live checklist** (Render sign-off)  
 - **[`docs/HANDOFF.md`](docs/HANDOFF.md)** — shipped scope, CopilotKit open questions  
-- **[`docs/DEPLOY.md`](docs/DEPLOY.md)** — Vercel import, env tables, E2B rebuild, troubleshooting  
+- **[`docs/DEPLOY.md`](docs/DEPLOY.md)** — Render deploy, env tables, E2B rebuild, pre-go-live checklist, troubleshooting  
+- **[`docs/RENDER.md`](docs/RENDER.md)** — Render quick reference, `render.yaml`, links to official docs  
 - **[`docs/DYNAMIC_MCP.md`](docs/DYNAMIC_MCP.md)** — dynamic MCP patterns  
 - **[`docs/PLAN.md`](docs/PLAN.md)** / **[`docs/E2B-IMPLEMENTATION.md`](docs/E2B-IMPLEMENTATION.md)** — roadmap and E2B design  
 

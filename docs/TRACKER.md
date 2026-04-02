@@ -1,14 +1,14 @@
 # Production go-live checklist
 
-Use this document to **sign off a Vercel (or similar) deployment** of the MCP App builder.
+Use this document to **sign off a Render deployment** of the MCP App builder.
 
 **Related docs:** step-by-step deploy **[`DEPLOY.md`](DEPLOY.md)** · developer setup **[`README.md`](../README.md)** · shipped features & open questions for stakeholders **[`HANDOFF.md`](HANDOFF.md)**.
 
 ---
 
-## Environment variables (Vercel → Settings → Environment Variables)
+## Environment variables (Render → Web Service → Environment)
 
-Configure at least **Production** (and Preview/Development if you use them).
+Configure **Production** (and other environments if you use them).
 
 ### Secrets and API keys
 
@@ -17,10 +17,11 @@ Configure at least **Production** (and Preview/Development if you use them).
 - [ ] **E2B template** — `E2B_TEMPLATE` (**`templateId`** from `build.dev.ts` / `build.prod.ts`; recommended for ~5s cold start — see `DEPLOY.md`)
 - [ ] **E2B repo** — `E2B_REPO_URL` only if the default clone URL should be overridden
 
-### Server / routing
+### Server / build
 
-- [ ] **Root directory** — `apps/web` or `with-mcp-apps/apps/web` so `vercel.json` reaches the monorepo root for `pnpm install`
-- [ ] **Function timeouts** — Long routes use `maxDuration` (see `DEPLOY.md`); confirm **Vercel plan** allows enough duration (e.g. provision / download / agent)
+- [ ] **Root directory** — **pnpm monorepo root** (folder with **`pnpm-lock.yaml`**), **not** `apps/web` alone (see `DEPLOY.md` / `RENDER.md`)
+- [ ] **Build / start** — Match `DEPLOY.md` or **`render.yaml`** (`pnpm install --frozen-lockfile`, `pnpm --filter web build`, `pnpm --filter web start`)
+- [ ] **Long requests** — Web Service runs Node continuously; still smoke-test agent streams and downloads on your Render plan
 
 ### Optional product / hosted MCP
 
@@ -29,7 +30,7 @@ Configure at least **Production** (and Preview/Development if you use them).
 ### Branding & copy (public env)
 
 - [ ] **Header** — `NEXT_PUBLIC_HEADER_*` / `NEXT_PUBLIC_GITHUB_REPO_URL` if defaults are wrong for this deployment
-- [ ] **Chat starters** — Defaults ship as three bounded demos; set `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` only if you want custom chips (see `HANDOFF.md`)
+- [ ] **Chat starters** — Defaults ship as four bounded demos + Excalidraw test; set `NEXT_PUBLIC_CHAT_STARTER_PROMPTS` only if you want custom chips (see `HANDOFF.md`)
 
 ---
 
@@ -45,7 +46,7 @@ Configure at least **Production** (and Preview/Development if you use them).
 ## Review before sign-off
 
 - [ ] **README** — Accurate for this repo (stack, scripts, E2B `templateId`, lockfile)
-- [ ] **DEPLOY.md** — Matches your Vercel layout and env set
+- [ ] **DEPLOY.md** — Matches your Render service root, build commands, and env set
 - [ ] **`.env.example`** — Complete for optional vars; file tracked
 - [ ] **End-to-end** — One full path: chat → provision (if E2B) → tools → download
 - [ ] **Vendor marks** — CopilotKit name/logo meets design/legal bar if required
